@@ -20,6 +20,7 @@ public class GuestVertex extends NewickVertex {
 		DUPLICATION,
 		LOSS,
 		TRANSFER,
+		REPLACING_TRANSFER,
 		HYBRID_DONATION,
 		HYBRID_DONATION_FROM_EXTINCT_DONOR,
 		ALLOPLOIDIC_HYBRID_RECEPTION,  // This is only one of the lineages of the polyploidisation.
@@ -48,6 +49,10 @@ public class GuestVertex extends NewickVertex {
 	
 	/** Tranfered to arc */
 	int transferedToArc = -1;
+	
+	boolean hasReplaced = false;
+	
+	boolean doNotReplace = false;
 	
 	/** Epoch. Not always applicable. */
 	Epoch epoch = null;
@@ -170,6 +175,24 @@ public class GuestVertex extends NewickVertex {
 				//String speciesEdge= "SPECIES_EDGE=("+ v.getTransferedFromArc() +","+ v.epoch.getNoOfArcs() +")";
 				//sb.append(" FROMTOLINEAGE="+ fromToArc +" "+ speciesEdge + " "+ discpt);
 				sb.append(" FROMTOLINEAGE="+ fromToArc +" "+ discpt);
+				break;
+			case REPLACING_TRANSFER:
+				sb.append(" VERTEXTYPE=Replacing Transfer");
+				String fromToArc2= "("+v.getTransferedFromArc()+","+ v.getTransferedToArc()+")";
+		
+				double [] discTimes2= v.epoch.getTimes();
+				int r=0;
+				while (true && r < discTimes2.length){
+					if (discTimes2[r] >= v.abstime){
+						break;
+					}	
+					++r;
+				}
+				String discpt2= "DISCPT=(" + v.epoch.getNo() + "," + r +")";
+				
+				//String speciesEdge= "SPECIES_EDGE=("+ v.getTransferedFromArc() +","+ v.epoch.getNoOfArcs() +")";
+				//sb.append(" FROMTOLINEAGE="+ fromToArc2 +" "+ speciesEdge + " "+ discpt2);
+				sb.append(" FROMTOLINEAGE="+ fromToArc2 +" "+ discpt2);
 				break;
 			case SPECIATION:
 				double [] disctTimes= v.epoch.getTimes();
