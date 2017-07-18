@@ -104,7 +104,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			System.out.println("-------------------------");
 			
 			GuestVertex lin = alive.pop();
-			if (lin.event == Event.LOSS || lin.event == Event.LEAF || lin.event == Event.UNSAMPLED_LEAF) {
+			if (lin.event == Event.LOSS || lin.event == Event.REPLACING_LOSS || lin.event == Event.LEAF || lin.event == Event.UNSAMPLED_LEAF) {
 				// Lineage ends.
 				continue;	
 			}
@@ -122,7 +122,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 				lc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
 				rc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
 				
-			} else if (lin.event == Event.TRANSFER) {
+			} else if (lin.event == Event.ADDITIVE_TRANSFER) {
 				if (prng.nextDouble() < 0.5) {
 					lc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
 					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma));
@@ -130,7 +130,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					rc = this.createGuestVertex(transferedToArc, lin.abstime, prng);			
 					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
 					
-					System.out.println("Transfer to: " + transferedToArc);
+					System.out.println("Additive Transfer to: " + transferedToArc);
 					
 				} else {
 					rc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
@@ -139,7 +139,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					lc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
 					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
 					
-					System.out.println("Transfer to: " + transferedToArc);
+					System.out.println("Additive Transfer to: " + transferedToArc);
 				}
 							
 			} else if (lin.event == Event.REPLACING_TRANSFER) {			
@@ -186,17 +186,21 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			// Induce loss for replacing transfer.
 			if (replacements.contains(lc.sigma)) {
 				if (!lc.doNotReplace) {
-					lc.event = Event.LOSS;
-					replacements.remove(Integer.valueOf(lc.sigma));
-					System.out.println("[3] Lineage Replaced at: " + lc.sigma);
+					if (lc.event != Event.LOSS) {
+						lc.event = Event.REPLACING_LOSS;
+						replacements.remove(Integer.valueOf(lc.sigma));
+						System.out.println("[3] Lineage Replaced at: " + lc.sigma);
+					}
 				}
 			}
 			
 			if (replacements.contains(rc.sigma)) {
 				if (!rc.doNotReplace) {
-					rc.event = Event.LOSS;
-					replacements.remove(Integer.valueOf(rc.sigma));
-					System.out.println("[3] Lineage Replaced at: " + rc.sigma);
+					if (rc.event != Event.LOSS) {
+						rc.event = Event.REPLACING_LOSS;
+						replacements.remove(Integer.valueOf(rc.sigma));
+						System.out.println("[3] Lineage Replaced at: " + rc.sigma);
+					}
 				}
 			}
 			
@@ -231,6 +235,31 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		System.out.println("-------------------------");
 		
 		return root;
+	}
+	
+	public void replaceLineage(int Y, LinkedList<GuestVertex> lineages, GuestVertex Z) {
+		for(GuestVertex vertex: lineages) {
+			if (vertex.sigma == Y){
+				if (vertex.event != Event.LOSS && vertex.event != Event.REPLACING_LOSS) {
+					vertex.event = Event.REPLACING_LOSS;
+					Z.hasReplaced = true;
+					return;
+				}
+			}
+		}
+	}
+	
+	public void listprint(LinkedList<GuestVertex> lineages) {
+		for(GuestVertex vertex: lineages) {
+			System.out.println(vertex.sigma);
+			System.out.println(vertex.event);
+		}
+	}
+	
+	public void arrayprint(ArrayList<Integer> tobereplaced) {
+		for(int lineage: tobereplaced) {
+			System.out.println(lineage);
+		}
 	}
 	
 	/**
@@ -275,7 +304,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 				} else if (rnd < this.mu / sum) {
 					event = GuestVertex.Event.LOSS;
 				} else if (rnd < 0.5) {
-					event = GuestVertex.Event.TRANSFER;
+					event = GuestVertex.Event.ADDITIVE_TRANSFER;
 				} else {
 					event = GuestVertex.Event.REPLACING_TRANSFER;
 				}
@@ -290,31 +319,6 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		return new GuestVertex(event, X, epoch, eventTime, branchTime);
 	}
 	
-	public void replaceLineage(int Y, LinkedList<GuestVertex> lineages, GuestVertex Z) {
-		for(GuestVertex vertex: lineages) {
-			if (vertex.sigma == Y){
-				if (vertex.event != Event.LOSS) {
-					vertex.event = Event.LOSS;
-					Z.hasReplaced = true;
-					return;
-				}
-			}
-		}
-	}
-	
-	public void listprint(LinkedList<GuestVertex> lineages) {
-		for(GuestVertex vertex: lineages) {
-			System.out.println(vertex.sigma);
-			System.out.println(vertex.event);
-		}
-	}
-	
-	public void arrayprint(ArrayList<Integer> tobereplaced) {
-		for(int lineage: tobereplaced) {
-			System.out.println(lineage);
-		}
-	}
-
 	@Override
 	public List<Integer> getHostLeaves() {
 		return this.hostTree.getLeaves();
@@ -328,7 +332,8 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		int noOfSpecs = 0;
 		int noOfDups = 0;
 		int noOfLosses = 0;
-		int noOfTrans = 0;
+		int noOfReplacing_Losses = 0;
+		int noOfAdditive_Trans = 0;
 		int noOfReplacing_Trans = 0;
 		double totalTime = 0.0;
 		double totalTimeBeneathStem = 0.0;
@@ -354,8 +359,11 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			case LOSS:
 				noOfLosses++;
 				break;
-			case TRANSFER:
-				noOfTrans++;
+			case REPLACING_LOSS:
+				noOfReplacing_Losses++;
+				break;
+			case ADDITIVE_TRANSFER:
+				noOfAdditive_Trans++;
 				break;
 			case REPLACING_TRANSFER:
 				noOfReplacing_Trans++;
@@ -379,17 +387,22 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		sb.append("No. of speciations:\t").append(noOfSpecs).append('\n');
 		sb.append("No. of duplications:\t").append(noOfDups).append('\n');
 		sb.append("No. of losses:\t").append(noOfLosses).append('\n');
-		sb.append("No. of transfers:\t").append(noOfTrans).append('\n');
+		sb.append("No. of replacing losses:\t").append(noOfReplacing_Losses).append('\n');
+		sb.append("No. of additive transfers:\t").append(noOfAdditive_Trans).append('\n');
 		sb.append("No. of replacing transfers:\t").append(noOfReplacing_Trans).append('\n');
 		sb.append("Total branch time:\t").append(totalTime).append('\n');
 		sb.append("Total branch time beneath host stem:\t").append(totalTimeBeneathStem).append('\n');
 		if (doML) {
 			double dupMLEst = NumberManipulation.roundToSignificantFigures(noOfDups / totalTime, 8);
 			double lossMLEst = NumberManipulation.roundToSignificantFigures(noOfLosses / totalTime, 8);
-			double transMLEst = NumberManipulation.roundToSignificantFigures(noOfTrans / totalTimeBeneathStem, 8);  // Excl. stem-spanning arcs.
+			double replacing_lossMLEst = NumberManipulation.roundToSignificantFigures(noOfReplacing_Losses / totalTime, 8);
+			double additive_transMLEst = NumberManipulation.roundToSignificantFigures(noOfAdditive_Trans / totalTimeBeneathStem, 8);  // Excl. stem-spanning arcs.
+			double replacing_transMLEst = NumberManipulation.roundToSignificantFigures(noOfReplacing_Trans / totalTimeBeneathStem, 8);  // Excl. stem-spanning arcs.
 			sb.append("Duplication ML estimate:\t").append(dupMLEst).append('\n');
 			sb.append("Loss ML estimate:\t").append(lossMLEst).append('\n');
-			sb.append("Transfer ML estimate:\t").append(transMLEst).append('\n');
+			sb.append("Replacing Loss ML estimate:\t").append(replacing_lossMLEst).append('\n');
+			sb.append("Additive Transfer ML estimate:\t").append(additive_transMLEst).append('\n');
+			sb.append("Replacing Transfer ML estimate:\t").append(replacing_transMLEst).append('\n');
 		}
 		return sb.toString();
 	}

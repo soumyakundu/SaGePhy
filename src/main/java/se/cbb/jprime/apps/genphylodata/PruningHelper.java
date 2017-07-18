@@ -23,7 +23,7 @@ public class PruningHelper {
 	 * @return the next available name.
 	 */
 	public static int labelUnprunableVertices(GuestVertex v, int nextNo, String vertexPrefix, boolean appendSigma) {
-		if (v.event == Event.LOSS || v.event == Event.UNSAMPLED_LEAF) {
+		if (v.event == Event.LOSS || v.event == Event.REPLACING_LOSS || v.event == Event.UNSAMPLED_LEAF) {
 			v.prunability = Prunability.PRUNABLE;
 		} else if (v.event == Event.LEAF) {
 			v.prunability = Prunability.UNPRUNABLE;

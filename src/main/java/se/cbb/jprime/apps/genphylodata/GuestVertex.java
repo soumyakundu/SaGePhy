@@ -19,7 +19,8 @@ public class GuestVertex extends NewickVertex {
 		UNSAMPLED_LEAF,   // Unsampled leaf.
 		DUPLICATION,
 		LOSS,
-		TRANSFER,
+		REPLACING_LOSS,
+		ADDITIVE_TRANSFER,
 		REPLACING_TRANSFER,
 		HYBRID_DONATION,
 		HYBRID_DONATION_FROM_EXTINCT_DONOR,
@@ -158,8 +159,11 @@ public class GuestVertex extends NewickVertex {
 			case LOSS:
 				sb.append(" VERTEXTYPE=Loss");
 				break;
-			case TRANSFER:
-				sb.append(" VERTEXTYPE=Transfer");
+			case REPLACING_LOSS:
+				sb.append(" VERTEXTYPE=Replacing Loss");
+				break;
+			case ADDITIVE_TRANSFER:
+				sb.append(" VERTEXTYPE=Additive Transfer");
 				String fromToArc= "("+v.getTransferedFromArc()+","+ v.getTransferedToArc()+")";
 		
 				double [] discTimes= v.epoch.getTimes();

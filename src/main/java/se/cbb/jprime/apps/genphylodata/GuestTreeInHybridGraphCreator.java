@@ -116,7 +116,7 @@ public class GuestTreeInHybridGraphCreator implements UnprunedGuestTreeCreator {
 				lin.setChildren(lc, rc);
 				alive.add(lc);
 				alive.add(rc);
-			} else if (lin.event == Event.TRANSFER) {
+			} else if (lin.event == Event.ADDITIVE_TRANSFER) {
 				throw new UnsupportedOperationException("Transfers in hybrid host graphs are currently not supported.");
 			} else if (lin.event == Event.HYBRID_DONATION) {
 				int[] sigmacs = hostGraph.getChildren(lin.sigma);
@@ -299,7 +299,7 @@ public class GuestTreeInHybridGraphCreator implements UnprunedGuestTreeCreator {
 			case LOSS:
 				noOfLosses++;
 				break;
-			case TRANSFER:
+			case ADDITIVE_TRANSFER:
 				throw new UnsupportedOperationException("Unexpected operation type.");
 			case SPECIATION:
 				noOfSpecs++;
