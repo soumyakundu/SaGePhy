@@ -1,8 +1,12 @@
 package se.cbb.jprime.apps.genphylodata;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NavigableMap;
+import java.util.TreeMap;
+
 import se.cbb.jprime.apps.genphylodata.GuestVertex.Event;
 import se.cbb.jprime.io.NewickIOException;
 import se.cbb.jprime.io.NewickVertex;
@@ -40,6 +44,12 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	/** Transfer rate. */
 	private double tau;
 	
+	/** Replacing Transfer rate. */
+	private double theta;
+	
+	/** Transfer distance bias. */
+	private String distance_bias;
+	
 	/** Sampling probability. */
 	private double rho;
 	
@@ -53,7 +63,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	 * @throws TopologyException.
 	 * @throws NewickIOException.
 	 */
-	public GuestTreeInHostTreeCreator(PrIMENewickTree host, double lambda, double mu, double tau, double rho, Double stem) throws TopologyException, NewickIOException {
+	public GuestTreeInHostTreeCreator(PrIMENewickTree host, double lambda, double mu, double tau, double theta, String distance_bias, double rho, Double stem) throws TopologyException, NewickIOException {
 		
 		// Host tree.
 		RBTree S = new RBTree(host, "HostTree");
@@ -74,6 +84,8 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		this.lambda = lambda;
 		this.mu = mu;
 		this.tau = tau;
+		this.theta = theta;
+		this.distance_bias = distance_bias;
 		this.rho = rho;
 		if (lambda < 0 || mu < 0 || tau < 0) {
 			throw new IllegalArgumentException("Cannot have rate less than 0.");
@@ -89,8 +101,11 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		// Currently processed lineages.
 		LinkedList<GuestVertex> alive = new LinkedList<GuestVertex>();
 		
-		// Lineages to be replaced by replacing transfers.
-		ArrayList<Integer> replacements = new ArrayList<Integer>();
+		// Used to sort replacing transfer lineages by decreasing event times.
+		NavigableMap<Double, GuestVertex> sortedlist = new TreeMap<Double, GuestVertex>();
+		
+		// List of replacing transfers ordered by decreasing event times.
+		ArrayList<GuestVertex> replacements = new ArrayList<GuestVertex>();
 		
 		// Single lineage at tip.
 		GuestVertex root = this.createGuestVertex(hostTree.getRoot(), hostTree.getTipToLeafTime(), prng);
@@ -125,7 +140,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			} else if (lin.event == Event.ADDITIVE_TRANSFER) {
 				if (prng.nextDouble() < 0.5) {
 					lc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma));
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias);
 					lin.setTransferedFromArc(lin.sigma);
 					rc = this.createGuestVertex(transferedToArc, lin.abstime, prng);			
 					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
@@ -134,7 +149,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					
 				} else {
 					rc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma));
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias);
 					lin.setTransferedFromArc(lin.sigma);
 					lc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
 					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
@@ -145,29 +160,25 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			} else if (lin.event == Event.REPLACING_TRANSFER) {			
 				if (prng.nextDouble() < 0.5) {
 					lc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					rc = this.createGuestVertex(lin.getTransferedToArc(), lin.abstime, prng);			
-					if (!lin.hasReplaced) {
-						this.replaceLineage(lin.getTransferedToArc(), alive, lin);
-						if (!lin.hasReplaced) {
-							replacements.add(lin.getTransferedToArc());
-							rc.doNotReplace = true;
-						}
-					}
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias);
+					lin.setTransferedFromArc(lin.sigma);
+					rc = this.createGuestVertex(transferedToArc, lin.abstime, prng);			
+					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
 					
-					System.out.println("[2] Replacing Transfer to: " + lin.getTransferedToArc());
+					sortedlist.put(lin.abstime, lin);
+					
+					System.out.println("Replacing Transfer to: " + lin.getTransferedToArc());
 					
 				} else {
 					rc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					lc = this.createGuestVertex(lin.getTransferedToArc(), lin.abstime, prng);
-					if (!lin.hasReplaced) {
-						this.replaceLineage(lin.getTransferedToArc(), alive, lin);
-						if (!lin.hasReplaced) {
-							replacements.add(lin.getTransferedToArc());
-							lc.doNotReplace = true;
-						}
-					}
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias);
+					lin.setTransferedFromArc(lin.sigma);
+					lc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
+					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
 					
-					System.out.println("[2] Replacing Transfer to: " + lin.getTransferedToArc());
+					sortedlist.put(lin.abstime, lin);
+					
+					System.out.println("Replacing Transfer to: " + lin.getTransferedToArc());
 				}
 								
 			} else {
@@ -182,52 +193,47 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			rc.setParent(lin);
 			alive.add(lc);
 			alive.add(rc);
-			
-			// Induce loss for replacing transfer.
-			if (replacements.contains(lc.sigma)) {
-				if (!lc.doNotReplace) {
-					if (lc.event != Event.LOSS) {
-						lc.event = Event.REPLACING_LOSS;
-						replacements.remove(Integer.valueOf(lc.sigma));
-						System.out.println("[3] Lineage Replaced at: " + lc.sigma);
-					}
-				}
-			}
-			
-			if (replacements.contains(rc.sigma)) {
-				if (!rc.doNotReplace) {
-					if (rc.event != Event.LOSS) {
-						rc.event = Event.REPLACING_LOSS;
-						replacements.remove(Integer.valueOf(rc.sigma));
-						System.out.println("[3] Lineage Replaced at: " + rc.sigma);
-					}
-				}
-			}
-			
-			// Handles preprocessing for replacing transfers.
-			if (lc.event == Event.REPLACING_TRANSFER) {
-				int transferedToArc = lc.epoch.sampleArc(prng, lc.sigma, lc.epoch.findIndexOfArc(lc.sigma));
-				lc.setTransferedFromArc(lc.sigma);
-				lc.setTransferedToArc(lc.epoch.getTranferedToArc());
-				this.replaceLineage(transferedToArc, alive, lc);
-								
-				System.out.println("[1] Replacing Transfer to: " + lc.getTransferedToArc());
-			}
-			
-			if (rc.event == Event.REPLACING_TRANSFER) {
-				int transferedToArc = rc.epoch.sampleArc(prng, rc.sigma, rc.epoch.findIndexOfArc(rc.sigma));
-				rc.setTransferedFromArc(rc.sigma);
-				rc.setTransferedToArc(rc.epoch.getTranferedToArc());
-				this.replaceLineage(transferedToArc, alive, rc);
-								
-				System.out.println("[1] Replacing Transfer to: " + rc.getTransferedToArc());
-			}
-			
+						
 		}
 		
 		// Restore 0 length stem.
 		if (root.getBranchLength() <= 1.0e-32) {
 			root.setBranchLength(0.0);
+		}
+		
+		while (!sortedlist.isEmpty()) {
+			GuestVertex item = sortedlist.pollLastEntry().getValue();
+			replacements.add(item);
+		}
+		
+		System.out.println("Replacements:");
+		this.arrayprint(replacements);
+		System.out.println("-------------------------");
+		
+		ArrayList<GuestVertex> invalidated = new ArrayList<GuestVertex>();
+		Iterator<GuestVertex> iter = replacements.iterator();
+		while (iter.hasNext()) {
+			GuestVertex x = iter.next();
+			if (invalidated.contains(x)) {
+				iter.remove();
+				continue;
+			}
+			GuestVertex node = findVertex(root, x);
+			if (node != null) {
+				node.event = Event.REPLACING_LOSS;
+				node.abstime = x.abstime;
+				for (GuestVertex y: replacements) {
+					if (isAncestor(node, y)) {
+						invalidated.add(y);
+					}
+				}
+				node.setChildren(null);
+				iter.remove();
+					
+				System.out.println("Lineage Replaced at: " + node.sigma);
+			} else {
+				x.event = Event.ADDITIVE_TRANSFER;
+			}
 		}
 		
 		System.out.println("Still to be replaced:");
@@ -237,18 +243,6 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		return root;
 	}
 	
-	public void replaceLineage(int Y, LinkedList<GuestVertex> lineages, GuestVertex Z) {
-		for(GuestVertex vertex: lineages) {
-			if (vertex.sigma == Y){
-				if (vertex.event != Event.LOSS && vertex.event != Event.REPLACING_LOSS) {
-					vertex.event = Event.REPLACING_LOSS;
-					Z.hasReplaced = true;
-					return;
-				}
-			}
-		}
-	}
-	
 	public void listprint(LinkedList<GuestVertex> lineages) {
 		for(GuestVertex vertex: lineages) {
 			System.out.println(vertex.sigma);
@@ -256,9 +250,41 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		}
 	}
 	
-	public void arrayprint(ArrayList<Integer> tobereplaced) {
-		for(int lineage: tobereplaced) {
-			System.out.println(lineage);
+	public void arrayprint(ArrayList<GuestVertex> tobereplaced) {
+		for(GuestVertex lineage: tobereplaced) {
+			System.out.println(lineage.sigma + ": " + lineage.abstime);
+		}
+	}
+	
+	public GuestVertex findVertex(GuestVertex node, GuestVertex x) {
+		if (node != null) {
+			if (node.sigma == x.getTransferedToArc() && node.event != Event.LOSS && node.event != Event.REPLACING_LOSS && node != x.getRightChild() && node != x.getLeftChild() && node.abstime < x.abstime) {
+				return node;
+			} else {
+				GuestVertex new_node = findVertex(node.getLeftChild(), x);
+				if (new_node == null) {
+					new_node = findVertex(node.getRightChild(), x);
+				}
+				return new_node;
+			}
+		} else {
+			return null;
+		}
+	}
+	
+	public boolean isAncestor(GuestVertex replaced, GuestVertex node) {
+		if (replaced != null) {
+			if (replaced == node) {
+				return true;
+			} else {
+				boolean new_node = isAncestor(replaced.getLeftChild(), node);
+				if (new_node == false) {
+					new_node = isAncestor(replaced.getRightChild(), node);
+				}
+				return new_node;
+			}
+		} else {
+			return false;
 		}
 	}
 	
@@ -303,10 +329,13 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					event = GuestVertex.Event.DUPLICATION;
 				} else if (rnd < this.mu / sum) {
 					event = GuestVertex.Event.LOSS;
-				} else if (rnd < 0.5) {
-					event = GuestVertex.Event.ADDITIVE_TRANSFER;
 				} else {
-					event = GuestVertex.Event.REPLACING_TRANSFER;
+					double trn = prng.nextDouble();
+					if (trn > this.theta) {
+						event = GuestVertex.Event.ADDITIVE_TRANSFER;
+					} else {
+						event = GuestVertex.Event.REPLACING_TRANSFER;
+					}
 				}
 			}
 			// Find correct epoch.

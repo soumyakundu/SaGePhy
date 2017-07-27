@@ -51,10 +51,6 @@ public class GuestVertex extends NewickVertex {
 	/** Tranfered to arc */
 	int transferedToArc = -1;
 	
-	boolean hasReplaced = false;
-	
-	boolean doNotReplace = false;
-	
 	/** Epoch. Not always applicable. */
 	Epoch epoch = null;
 	
@@ -117,8 +113,12 @@ public class GuestVertex extends NewickVertex {
 	 * @return left child.
 	 */
 	public GuestVertex getLeftChild() {
+		if (this.getChildren() != null) {
 		if (this.isLeaf()) { return null; }
-		return (GuestVertex) this.getChildren().get(0);
+			return (GuestVertex) this.getChildren().get(0);
+		} else {
+			return null;
+		}
 	}
 	
 	/**
@@ -126,8 +126,12 @@ public class GuestVertex extends NewickVertex {
 	 * @return right child.
 	 */
 	public GuestVertex getRightChild() {
+		if (this.getChildren() != null) {
 		if (this.getChildren().size() == 1) { return null; }
-		return (GuestVertex) this.getChildren().get(1);
+			return (GuestVertex) this.getChildren().get(1);
+		} else {
+			return null;
+		}
 	}
 	
 	/**

@@ -1,6 +1,8 @@
 package se.cbb.jprime.topology;
 
 import java.util.List;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 import org.jfree.util.PublicCloneable;
 
@@ -37,6 +39,9 @@ public class Epoch implements PublicCloneable {
 	
 	/** List of times of epoch, both endpoint times included. */
 	private double[] m_times;
+	
+	/** Host Tree. */
+	private RBTreeEpochDiscretiser tree;
 		
 	/** Timestep between discretised times. Stored explicitly for speed. */
 	private double m_timestep;
@@ -52,7 +57,7 @@ public class Epoch implements PublicCloneable {
 	 * @param upTime the time of the epoch's upper divergence event.
 	 * @param noOfIvs the number of sub-intervals to slice epoch into.
 	 */
-	public Epoch(int no, List<Integer> arcs, double loTime, double upTime, int noOfIvs) {
+	public Epoch(int no, List<Integer> arcs, double loTime, double upTime, int noOfIvs, RBTreeEpochDiscretiser tree) {
 		this.no = no;
 		m_arcs = new int[arcs.size()];
 		int i = 0;
@@ -60,6 +65,7 @@ public class Epoch implements PublicCloneable {
 			m_arcs[i++] = arc;
 		}
 		m_times = new double[noOfIvs + 2];
+		this.tree = tree;
 		m_timestep = (upTime - loTime) / noOfIvs;
 	
 		assert(upTime > loTime);
@@ -215,30 +221,6 @@ public class Epoch implements PublicCloneable {
 		this.transferedToArc= arc;
 	}
 	
-//	/**
-//	 * Samples an arc uniformly from the epoch, excluding a given arc.
-//	 * @param prng PRNG.
-//	 * @param excludeArc arc to exclude.
-//	 */
-//	public int sampleArc(PRNG prng, int excludeArc) {
-//		if (this.m_arcs.length == 1 && excludeArc == m_arcs[0]) {
-//			throw new IllegalArgumentException("Cannot exclude arc from sampling (it's the only one!): " + excludeArc);
-//		}
-//		
-//		int idx= prng.nextInt(this.m_arcs.length);
-//		int arc=this.m_arcs[idx];
-//		while (true){
-//			if (idx != excludeArc){
-//				arc= this.m_arcs[idx];
-//				break;
-//			}
-//			idx= prng.nextInt(this.m_arcs.length);
-//		}
-//		this.setTranferedToArc(idx);
-//		
-//		return arc;
-//	}
-
 	/**
 	 * Find index of the given arc of species tree
 	 * @param arc
@@ -256,30 +238,59 @@ public class Epoch implements PublicCloneable {
 	}
 	
 	/**
-	 * Samples an arc uniformly from the epoch, excluding a given arc.
+	 * Samples an arc from the epoch, excluding a given arc.
 	 * @param prng PRNG.
 	 * @param excludeArc arc to exclude.
 	 */
-	public int sampleArc(PRNG prng, int excludeArc, int fromArc) {
+	public int sampleArc(PRNG prng, int excludeArc, int fromArc, double eventTime, String distance_bias) {
+		int arc;
 		if (this.m_arcs.length == 1 && excludeArc == m_arcs[0]) {
 			throw new IllegalArgumentException("Cannot exclude arc from sampling (it's the only one!): " + excludeArc);
 		}
-		int to= prng.nextInt(this.m_arcs.length);
-		int arc = this.m_arcs[to];
-		//System.out.println("arc: "+  arc+ " idx: "+ idx+ " excludeArc: "+ excludeArc);
-		//while (arc == excludeArc || idx == excludeArc) {
-		while (true ) {
-			if (to != fromArc && arc != excludeArc){
-				break;
-			}
-			to= prng.nextInt(this.m_arcs.length);
+		if (!distance_bias.equals("none")) {
+			NavigableMap<Double, Integer> dist = setDistance(excludeArc, eventTime, distance_bias);
+			double total = dist.lastKey();
+			double rand = prng.nextDouble() * total;
+			arc = dist.higherEntry(rand).getValue();
+		} else {
+			
+			System.out.println(this.m_arcs);
+			
+			int to = prng.nextInt(this.m_arcs.length);
 			arc = this.m_arcs[to];
+			while (true) {
+				if (to != fromArc && arc != excludeArc) {
+					break;
+				}
+				to = prng.nextInt(this.m_arcs.length);
+				arc = this.m_arcs[to];
+			}
 		}
-		// this may be one of the reason why we were getting wrong to's : changes feb 23 2015
-		//this.setTranferedToArc(to);
 		this.setTranferedToArc(arc);
-		
 		return arc;
+	}
+	
+	/** Returns HashMap of phylogenetic distances to all loci in the epoch eligible to receive transfers from given recipient. */	
+	
+	public NavigableMap<Double, Integer> setDistance(int excludeArc, double eventTime, String distance_bias) {
+		double total = 0.0;
+		double value;
+		NavigableMap<Double, Integer> phy_dist = new TreeMap<Double, Integer>();
+		for (int x : m_arcs) {
+			if (x != excludeArc) {
+				if (distance_bias.equals("simple")) {
+					value = 1.0 / tree.getDistance(excludeArc, x, eventTime);
+				} else {
+					value = Math.pow(10.0, 1.0 / tree.getDistance(excludeArc, x, eventTime));
+				}
+				total += value;
+				phy_dist.put(total, x);
+			}
+		}
+		
+		System.out.println(phy_dist);
+		
+		return phy_dist;
 	}
 	
 	/**

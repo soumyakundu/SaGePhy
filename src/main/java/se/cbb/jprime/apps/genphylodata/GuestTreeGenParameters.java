@@ -105,6 +105,14 @@ public class GuestTreeGenParameters {
 			" The transfer rate parameter will be ignored (i.e., set to 0). The additional parameters refer to a change-factor applied to the parameters for a limited time following a hybrid speciation.")
 	public List<String> hybrid = null;
 	
+	/** Rate of replacing transfers. */
+	@Parameter(names = {"-rt", "--replacing-transfers"}, description = "Probability of replacing horizontal gene transfers.")
+	public String replacing_transfers = "0.7";
+	
+	/** Type of distance bias for transfers. */
+	@Parameter(names = {"-db", "--distance-bias"}, description = "Type of distance-bias for horizontal gene transfers. Options: none, simple, exponential.")
+	public String distance_bias = "exponential";
+	
 	/**
 	 * Returns output and info streams.
 	 * @return streams.
@@ -126,7 +134,7 @@ public class GuestTreeGenParameters {
 		} else {
 			host = PrIMENewickTreeReader.readTree(args.get(0), false, true);
 		}
-		return new GuestTreeInHostTreeCreator(host, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getLeafSamplingProb(), this.getStem());
+		return new GuestTreeInHostTreeCreator(host, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getReplacingTransferRate(), this.distance_bias, this.getLeafSamplingProb(), this.getStem());
 	}
 	
 	public double getDuplicationRate() {
@@ -159,6 +167,10 @@ public class GuestTreeGenParameters {
 	
 	public Double getLeafSamplingProb() {
 		return Double.parseDouble(this.leafSamplingProb);
+	}
+	
+	public Double getReplacingTransferRate() {
+		return Double.parseDouble(this.replacing_transfers);
 	}
 
 	public GuestTreeInHybridGraphCreator getHostHybridGraphCreator() throws GMLIOException, IOException {

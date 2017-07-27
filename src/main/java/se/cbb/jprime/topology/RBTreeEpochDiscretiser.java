@@ -98,6 +98,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		this.nroot = 1;
 		vertexToEpoch = new IntMap("VertexAboveMap", S.getNoOfVertices());
 		update();
+		//setDistance(distances);
 	}
 	
 	/**
@@ -131,6 +132,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		this.nroot = nroot;
 		vertexToEpoch = new IntMap("VertexAboveMap", S.getNoOfVertices());
 		update();
+		//setDistance(distances);
 	}
 		
 	/**
@@ -151,6 +153,8 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		int xLo = q.peekFirst();                   // Lower vertex of epoch.
 		double tLo = times.getVertexTime(xLo);     // Lower time of epoch.
 		double tUp;                                // Upper time of epoch.
+		
+		System.out.println("Species Tree:");
 			
 		// Find epochs.
 		int epochNo = 0;
@@ -178,11 +182,14 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 			
 			// Create epoch, etc.
 			int noOfIvs = Math.min(Math.max(this.nmin, (int) Math.ceil((tUp - tLo) / this.deltat - 1e-6)), this.nmax);
-			epochs[epochNo] = new Epoch(epochNo, q, tLo, tUp, noOfIvs);
+			epochs[epochNo] = new Epoch(epochNo, q, tLo, tUp, noOfIvs, this);
 			splits[epochNo + 1] = xUpIdx;
 			vertexToEpoch.set(xLo, epochNo);
 			
 			// Update arcs for next epoch. IMPORTANT: Note "order conservation".
+			
+			System.out.println(q);
+			
 			int par = this.S.getParent(q.remove(xUpIdx));   // Remove left child arc.
 			q.add(xUpIdx, par);           // Insert parent arc where child arcs were originally placed.
 			q.remove(xUpIdx + 1);         // Remove right child arc.
@@ -190,6 +197,9 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 			tLo = tUp;
 			epochNo++;
 		}
+		
+		System.out.println(q);
+		System.out.println("-------------------------");
 		
 		// Only the root should now remain.
 		assert(q.size() == 1 && xLo == q.peekFirst() && xLo == S.getRoot());
@@ -202,8 +212,16 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		assert(tLo < tUp);
 		int noOfIvs = this.nroot > 0 ? this.nroot :
 				Math.min(Math.max(this.nmin, (int) Math.ceil((tUp - tLo) / this.deltat - 1e-6)), this.nmax);
-		epochs[epochNo] = new Epoch(epochNo, q, tLo, tUp, noOfIvs);
+		epochs[epochNo] = new Epoch(epochNo, q, tLo, tUp, noOfIvs, this);
 		vertexToEpoch.set(xLo, epochNo);      // Actually undefined, since top time arc.
+	}
+	
+	/** Calculates phylogenetic distance between transfer donor and candidate for transfer recipient. */
+	
+	public double getDistance(int x, int y, double eventTime) {
+		int LCA = S.getLCA(x, y);
+		double distance = 2.0 * (this.getVertexTime(LCA) - eventTime);
+		return distance;
 	}
 	
 	/**
