@@ -258,7 +258,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	
 	public GuestVertex findVertex(GuestVertex node, GuestVertex x) {
 		if (node != null) {
-			if (node.sigma == x.getTransferedToArc() && node.event != Event.LOSS && node.event != Event.REPLACING_LOSS && node != x.getRightChild() && node != x.getLeftChild() && node.abstime < x.abstime) {
+			if (node.sigma == x.getTransferedToArc() && node != x.getRightChild() && node != x.getLeftChild() && node.abstime < x.abstime) {
 				return node;
 			} else {
 				GuestVertex new_node = findVertex(node.getLeftChild(), x);

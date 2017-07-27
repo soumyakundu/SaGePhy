@@ -28,7 +28,7 @@
 
 6. After the guest tree is generated, the vertices in the NavigableMap are added to an ArrayList in decreasing order of event times in order to ensure that a replacing transfer that is processed later does not replace a previously processed replacing transfer lineage or its ancestor.
 
-7. For each vertex in the ArrayList, a guest tree lineage in the host tree edge to which the transfer has occured is searched, such that the guest tree lineage cannot be a child of the replacing transfer lineage, that the guest tree lineage does not have a loss or a replacing loss event, and that the guest tree lineage must have an event time lower than that for the replacing transfer lineage.
+7. For each vertex in the ArrayList, a guest tree lineage in the host tree edge to which the transfer has occured is searched, such that the guest tree lineage cannot be a child of the replacing transfer lineage and that the guest tree lineage must have an event time lower than that for the replacing transfer lineage.
 
 8. If such a guest tree lineage is found, then the event for that lineage is changed to a replacing loss, while its event time is changed to that of the replacing transfer.
 
