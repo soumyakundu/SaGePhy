@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
@@ -27,6 +28,7 @@ import se.cbb.jprime.topology.TopologyException;
  * @author Joel Sjöstrand.
  * @author Mehmood Alam Khan
  */
+
 public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 	/** Host tree. */
@@ -63,6 +65,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	 * @throws TopologyException.
 	 * @throws NewickIOException.
 	 */
+	
 	public GuestTreeInHostTreeCreator(PrIMENewickTree host, double lambda, double mu, double tau, double theta, String distance_bias, double rho, Double stem) throws TopologyException, NewickIOException {
 		
 		// Host tree.
@@ -104,31 +107,31 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		// Used to sort replacing transfer lineages by decreasing event times.
 		NavigableMap<Double, GuestVertex> sortedlist = new TreeMap<Double, GuestVertex>();
 		
-		// List of replacing transfers ordered by decreasing event times.
-		ArrayList<GuestVertex> replacements = new ArrayList<GuestVertex>();
-		
 		// Single lineage at tip.
 		GuestVertex root = this.createGuestVertex(hostTree.getRoot(), hostTree.getTipToLeafTime(), prng);
 		alive.add(root);
-		
+				
 		// Recursively process lineages.
 		while (!alive.isEmpty()) {
 			
 			// Prints out current lineages and their events.
-			this.listprint(alive);
-			System.out.println("-------------------------");
-			
+			//this.listprint(alive);
+			//System.out.println("-------------------------");
+						
 			GuestVertex lin = alive.pop();
 			if (lin.event == Event.LOSS || lin.event == Event.REPLACING_LOSS || lin.event == Event.LEAF || lin.event == Event.UNSAMPLED_LEAF) {
 				// Lineage ends.
+				if (alive.isEmpty()) {
+					if (!sortedlist.isEmpty()) {
+						alive.add(sortedlist.pollLastEntry().getValue());
+					}
+				}				
 				continue;	
 			}
-			
+						
 			GuestVertex lc = null;
 			GuestVertex rc = null;
-			
-			//System.out.println("epoch id:"+lin.epoch.getNo()+" total arcs:"+ lin.epoch.getNoOfArcs());
-			
+						
 			if (lin.event == Event.SPECIATION) {
 				lc = this.createGuestVertex(hostTree.getLeftChild(lin.sigma), lin.abstime, prng);
 				rc = this.createGuestVertex(hostTree.getRightChild(lin.sigma), lin.abstime, prng);
@@ -140,47 +143,109 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			} else if (lin.event == Event.ADDITIVE_TRANSFER) {
 				if (prng.nextDouble() < 0.5) {
 					lc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias);
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null);
 					lin.setTransferedFromArc(lin.sigma);
 					rc = this.createGuestVertex(transferedToArc, lin.abstime, prng);			
 					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
 					
-					System.out.println("Additive Transfer to: " + transferedToArc);
+					//System.out.println("Additive Transfer to: " + transferedToArc);
 					
 				} else {
 					rc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias);
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null);
 					lin.setTransferedFromArc(lin.sigma);
 					lc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
 					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
 					
-					System.out.println("Additive Transfer to: " + transferedToArc);
+					//System.out.println("Additive Transfer to: " + transferedToArc);
 				}
 							
 			} else if (lin.event == Event.REPLACING_TRANSFER) {			
 				if (prng.nextDouble() < 0.5) {
 					lc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias);
-					lin.setTransferedFromArc(lin.sigma);
-					rc = this.createGuestVertex(transferedToArc, lin.abstime, prng);			
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null);
+					lin.setTransferedFromArc(lin.sigma);			
 					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
 					
-					sortedlist.put(lin.abstime, lin);
+					GuestVertex node = findVertex(root, lin);
+					ArrayList<Integer> emptyArcs = new ArrayList<Integer>();
+										
+					while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)) {
+												
+						if (!emptyArcs.contains(lin.transferedToArc)) {
+							emptyArcs.add(lin.transferedToArc);
+						}
+						
+						if (emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)) {
+							lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, emptyArcs);						
+							node = findVertex(root, lin);
+						}
+					}					
 					
-					System.out.println("Replacing Transfer to: " + lin.getTransferedToArc());
-					
+					if (node != null) {
+						rc = this.createGuestVertex(lin.transferedToArc, lin.abstime, prng);
+						node.event = Event.REPLACING_LOSS;
+						node.abstime = lin.abstime;
+						Iterator<Map.Entry<Double, GuestVertex>> iter = sortedlist.entrySet().iterator();
+						while (iter.hasNext()) {
+							GuestVertex x = iter.next().getValue();
+							if (isAncestor(node, x)) {
+								iter.remove();
+							}
+						}
+						node.setChildren(null);
+						
+						//System.out.println("Replacing Transfer to: " + transferedToArc);
+						
+					} else {
+						lin.event = Event.ADDITIVE_TRANSFER;
+						rc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
+						System.out.println("Could not replace from: " + lin.sigma + ", to " + lin.abstime);
+					}
+										
 				} else {
 					rc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias);
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null);
 					lin.setTransferedFromArc(lin.sigma);
-					lc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
 					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
 					
-					sortedlist.put(lin.abstime, lin);
+					GuestVertex node = findVertex(root, lin);
+					ArrayList<Integer> emptyArcs = new ArrayList<Integer>();
+										
+					while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)) {
+												
+						if (!emptyArcs.contains(lin.transferedToArc)) {
+							emptyArcs.add(lin.transferedToArc);
+						}
+						
+						if (emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)) {
+							lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, emptyArcs);						
+							node = findVertex(root, lin);
+						}
+					}					
 					
-					System.out.println("Replacing Transfer to: " + lin.getTransferedToArc());
+					if (node != null) {
+						lc = this.createGuestVertex(lin.transferedToArc, lin.abstime, prng);
+						node.event = Event.REPLACING_LOSS;
+						node.abstime = lin.abstime;
+						Iterator<Map.Entry<Double, GuestVertex>> iter = sortedlist.entrySet().iterator();
+						while (iter.hasNext()) {
+							GuestVertex x = iter.next().getValue();
+							if (isAncestor(node, x)) {
+								iter.remove();
+							}
+						}
+						node.setChildren(null);
+						
+						//System.out.println("Replacing Transfer to: " + transferedToArc);
+						
+					} else {
+						lin.event = Event.ADDITIVE_TRANSFER;
+						lc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
+						System.out.println("Could not replace from: " + lin.sigma + ", to: " + lin.abstime);
+					}
 				}
-								
+				
 			} else {
 				throw new UnsupportedOperationException("Unexpected event type.");
 			}
@@ -191,74 +256,50 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			lin.setChildren(children);
 			lc.setParent(lin);
 			rc.setParent(lin);
-			alive.add(lc);
-			alive.add(rc);
-						
+			
+			if (lc.event != Event.REPLACING_TRANSFER) {
+				alive.add(lc);
+			} else {
+				sortedlist.put(lc.abstime, lc);
+			}
+			
+			if (rc.event != Event.REPLACING_TRANSFER) {
+				alive.add(rc);
+			} else {
+				sortedlist.put(rc.abstime, rc);
+			}
+			
+			if (alive.isEmpty()) {
+				if (!sortedlist.isEmpty()) {
+					alive.add(sortedlist.pollLastEntry().getValue());
+				}
+			}
 		}
 		
 		// Restore 0 length stem.
 		if (root.getBranchLength() <= 1.0e-32) {
 			root.setBranchLength(0.0);
 		}
-		
-		while (!sortedlist.isEmpty()) {
-			GuestVertex item = sortedlist.pollLastEntry().getValue();
-			replacements.add(item);
-		}
-		
-		System.out.println("Replacements:");
-		this.arrayprint(replacements);
-		System.out.println("-------------------------");
-		
-		ArrayList<GuestVertex> invalidated = new ArrayList<GuestVertex>();
-		Iterator<GuestVertex> iter = replacements.iterator();
-		while (iter.hasNext()) {
-			GuestVertex x = iter.next();
-			if (invalidated.contains(x)) {
-				iter.remove();
-				continue;
-			}
-			GuestVertex node = findVertex(root, x);
-			if (node != null) {
-				node.event = Event.REPLACING_LOSS;
-				node.abstime = x.abstime;
-				for (GuestVertex y: replacements) {
-					if (isAncestor(node, y)) {
-						invalidated.add(y);
-					}
-				}
-				node.setChildren(null);
-				iter.remove();
-					
-				System.out.println("Lineage Replaced at: " + node.sigma);
-			} else {
-				x.event = Event.ADDITIVE_TRANSFER;
-			}
-		}
-		
-		System.out.println("Still to be replaced:");
-		this.arrayprint(replacements);
-		System.out.println("-------------------------");
+				
+		//System.out.println("Still to be replaced:");
+		//System.out.println(sortedlist);
+		//System.out.println("-------------------------");
 		
 		return root;
 	}
 	
+	//Prints all elements of a given LinkedList of GuestVertices.
 	public void listprint(LinkedList<GuestVertex> lineages) {
 		for(GuestVertex vertex: lineages) {
 			System.out.println(vertex.sigma);
-			System.out.println(vertex.event);
+			System.out.println(vertex.event + ": " + vertex.abstime);
 		}
 	}
 	
-	public void arrayprint(ArrayList<GuestVertex> tobereplaced) {
-		for(GuestVertex lineage: tobereplaced) {
-			System.out.println(lineage.sigma + ": " + lineage.abstime);
-		}
-	}
-	
+	//Finds a given vertex in a given tree.
 	public GuestVertex findVertex(GuestVertex node, GuestVertex x) {
 		if (node != null) {
-			if (node.sigma == x.getTransferedToArc() && node != x.getRightChild() && node != x.getLeftChild() && node.abstime < x.abstime) {
+			if (node.sigma == x.getTransferedToArc() && node != x.getRightChild() && node != x.getLeftChild() && node.abstime < x.abstime && (node.abstime + node.getBranchLength()) > x.abstime) {
 				return node;
 			} else {
 				GuestVertex new_node = findVertex(node.getLeftChild(), x);
@@ -272,6 +313,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		}
 	}
 	
+	//Determines if a given node is an ancestor of another node.
 	public boolean isAncestor(GuestVertex replaced, GuestVertex node) {
 		if (replaced != null) {
 			if (replaced == node) {
@@ -331,10 +373,10 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					event = GuestVertex.Event.LOSS;
 				} else {
 					double trn = prng.nextDouble();
-					if (trn > this.theta) {
-						event = GuestVertex.Event.ADDITIVE_TRANSFER;
-					} else {
+					if (trn < this.theta) {
 						event = GuestVertex.Event.REPLACING_TRANSFER;
+					} else {
+						event = GuestVertex.Event.ADDITIVE_TRANSFER;
 					}
 				}
 			}

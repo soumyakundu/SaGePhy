@@ -154,7 +154,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		double tLo = times.getVertexTime(xLo);     // Lower time of epoch.
 		double tUp;                                // Upper time of epoch.
 		
-		System.out.println("Species Tree:");
+		//System.out.println("Species Tree:");
 			
 		// Find epochs.
 		int epochNo = 0;
@@ -188,7 +188,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 			
 			// Update arcs for next epoch. IMPORTANT: Note "order conservation".
 			
-			System.out.println(q);
+			//System.out.println(q);
 			
 			int par = this.S.getParent(q.remove(xUpIdx));   // Remove left child arc.
 			q.add(xUpIdx, par);           // Insert parent arc where child arcs were originally placed.
@@ -198,8 +198,8 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 			epochNo++;
 		}
 		
-		System.out.println(q);
-		System.out.println("-------------------------");
+		//System.out.println(q);
+		//System.out.println("-------------------------");
 		
 		// Only the root should now remain.
 		assert(q.size() == 1 && xLo == q.peekFirst() && xLo == S.getRoot());

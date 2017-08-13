@@ -1,5 +1,7 @@
 package se.cbb.jprime.topology;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -242,19 +244,33 @@ public class Epoch implements PublicCloneable {
 	 * @param prng PRNG.
 	 * @param excludeArc arc to exclude.
 	 */
-	public int sampleArc(PRNG prng, int excludeArc, int fromArc, double eventTime, String distance_bias) {
+	public int sampleArc(PRNG prng, int excludeArc, int fromArc, double eventTime, String distance_bias, ArrayList<Integer> emptyArcs) {
 		int arc;
 		if (this.m_arcs.length == 1 && excludeArc == m_arcs[0]) {
 			throw new IllegalArgumentException("Cannot exclude arc from sampling (it's the only one!): " + excludeArc);
 		}
 		if (!distance_bias.equals("none")) {
-			NavigableMap<Double, Integer> dist = setDistance(excludeArc, eventTime, distance_bias);
-			double total = dist.lastKey();
-			double rand = prng.nextDouble() * total;
+			NavigableMap<BigDecimal, Integer> dist = setDistance(excludeArc, eventTime, distance_bias, emptyArcs);
+			BigDecimal total = dist.lastKey();
+			
+			//System.out.println("Final Total: " + total);
+			
+			BigDecimal rand;
+			
+			//System.out.println("Check A");
+			
+			do {
+				rand = total.multiply(BigDecimal.valueOf(prng.nextDouble()));
+				//System.out.println("Random: " + rand);
+			} while (rand == total);
+			
+			//System.out.println("Check B");
+			
 			arc = dist.higherEntry(rand).getValue();
 		} else {
 			
-			System.out.println(this.m_arcs);
+			//System.out.println(this.m_arcs);
+			//System.out.println("No Distance Bias");
 			
 			int to = prng.nextInt(this.m_arcs.length);
 			arc = this.m_arcs[to];
@@ -270,25 +286,43 @@ public class Epoch implements PublicCloneable {
 		return arc;
 	}
 	
-	/** Returns HashMap of phylogenetic distances to all loci in the epoch eligible to receive transfers from given recipient. */	
+	/** Returns HashMap of phylogenetic distances to all lineages in the epoch eligible to receive transfers from given recipient. */	
 	
-	public NavigableMap<Double, Integer> setDistance(int excludeArc, double eventTime, String distance_bias) {
-		double total = 0.0;
-		double value;
-		NavigableMap<Double, Integer> phy_dist = new TreeMap<Double, Integer>();
+	public NavigableMap<BigDecimal, Integer> setDistance(int excludeArc, double eventTime, String distance_bias, ArrayList<Integer> emptyArcs) {
+		//System.out.println("Distance Bias");
+		BigDecimal total = new BigDecimal(0);
+		BigDecimal value;
+		NavigableMap<BigDecimal, Integer> phy_dist = new TreeMap<BigDecimal, Integer>();
 		for (int x : m_arcs) {
 			if (x != excludeArc) {
-				if (distance_bias.equals("simple")) {
-					value = 1.0 / tree.getDistance(excludeArc, x, eventTime);
-				} else {
-					value = Math.pow(10.0, 1.0 / tree.getDistance(excludeArc, x, eventTime));
+				if (emptyArcs == null || !emptyArcs.contains(x)) {
+					if (distance_bias.equals("exponential")) {
+						//System.out.println("Exponential");
+						double doubleValue = (Math.pow(10.0, (-1.0 * tree.getDistance(excludeArc, x, eventTime))));
+						if (Double.isInfinite(doubleValue)) {
+							doubleValue = Double.MAX_VALUE;
+						}
+						value = BigDecimal.valueOf(doubleValue);
+					} else {
+						//System.out.println("Simple");
+						double doubleValue = (1.0 / tree.getDistance(excludeArc, x, eventTime));
+						if (Double.isInfinite(doubleValue)) {
+							doubleValue = Double.MAX_VALUE;
+						}
+						value = BigDecimal.valueOf(doubleValue);
+					}
+					total = total.add(value);
+					phy_dist.put(total, x);
+					
+					//System.out.println("Distance: " + tree.getDistance(excludeArc, x, eventTime));
+					//System.out.println("Value: " + value);
+					//System.out.println("Total: " + total);
+					
 				}
-				total += value;
-				phy_dist.put(total, x);
 			}
 		}
 		
-		System.out.println(phy_dist);
+		//System.out.println(phy_dist);
 		
 		return phy_dist;
 	}

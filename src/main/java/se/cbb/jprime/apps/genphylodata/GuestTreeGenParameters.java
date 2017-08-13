@@ -111,7 +111,7 @@ public class GuestTreeGenParameters {
 	
 	/** Type of distance bias for transfers. */
 	@Parameter(names = {"-db", "--distance-bias"}, description = "Type of distance-bias for horizontal gene transfers. Options: none, simple, exponential.")
-	public String distance_bias = "exponential";
+	public String distance_bias = "simple";
 	
 	/**
 	 * Returns output and info streams.

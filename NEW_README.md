@@ -36,7 +36,9 @@
 
 10. Finally, the replacing loss lineage's children pointer is set to null and the processed replacing transfer is removed from the ArrayList.
 
-11. If a suitable lineage is not found for replacement, then the replacing transfer's event is changed to additive transfer to better reflect the true nature of the event.
+11. If a suitable guest tree lineage is not found for replacement within the chosen host tree lineage, then another host tree lineage from the same epoch is selected at random to be the new recipient for the replacing transfer; this continues until there are no other host tree lineages that can be a suitable recipient for the replacing transfer.
+
+12. If no suitable recipient for the replacing transfer is found, then the replacing transfer's event is changed to additive transfer to better reflect the true nature of the event.
 
 ---
 

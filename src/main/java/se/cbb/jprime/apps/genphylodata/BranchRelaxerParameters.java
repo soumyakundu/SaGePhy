@@ -59,7 +59,7 @@ public class BranchRelaxerParameters {
 	public Boolean doMeta = false;
 	
 	/** Do meta. */
-	@Parameter(names = {"-innms", "--keep-interior-names"}, description = "Keep interior vertex names in outpout tree. These are otherwise cleared.")
+	@Parameter(names = {"-innms", "--keep-interior-names"}, description = "Keep interior vertex names in output tree. These are otherwise cleared.")
 	public Boolean keepInteriorNames = false;
 	
 	/** Min rate. */
