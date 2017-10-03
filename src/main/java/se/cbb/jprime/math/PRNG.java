@@ -16,7 +16,7 @@ import se.cbb.jprime.mcmc.InfoProvider;
  * 
  * @author Joel Sjöstrand.
  */
-public class PRNG extends MersenneTwisterRNG implements InfoProvider {
+public class PRNG extends MersenneTwisterRNG2 implements InfoProvider {
 
 	/** Eclipse-generated serial version UID. */
 	private static final long serialVersionUID = 310669248550266600L;
