@@ -62,7 +62,7 @@
 
 2. If the simple distance bias model is selected, then a NavigableMap of values corresponding to the inverse of the phylogenetic distances to all possible transfer recipients is populated, from which one receipient is randomly chosen, where the expectation of choosing any recipient is directly correlated to the inverse of its phylogentic distance from the donor.
 
-3. If the exponential distance bias model is selected, then a NavigableMap of values corresponding to 10 raised to the power of the inverse of the phylogenetic distances to all possible transfer recipients is populated, from which one receipient is randomly chosen, where the expectation of choosing any recipient is directly correlated to the log of the inverse of its phylogentic distance from the donor.
+3. If the exponential distance bias model is selected, then a NavigableMap of values corresponding to 10 raised to the power of the negative of the phylogenetic distances to all possible transfer recipients is populated, from which one receipient is randomly chosen, where the expectation of choosing any recipient is directly negatively correlated to the log of its phylogentic distance from the donor.
 
 ---
 

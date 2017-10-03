@@ -107,7 +107,7 @@ public class GuestTreeGenParameters {
 	
 	/** Rate of replacing transfers. */
 	@Parameter(names = {"-rt", "--replacing-transfers"}, description = "Probability of replacing horizontal gene transfers.")
-	public String replacing_transfers = "0.7";
+	public String replacing_transfers = "0.5";
 	
 	/** Type of distance bias for transfers. */
 	@Parameter(names = {"-db", "--distance-bias"}, description = "Type of distance-bias for horizontal gene transfers. Options: none, simple, exponential.")
