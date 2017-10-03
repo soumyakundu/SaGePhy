@@ -200,7 +200,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					} else {
 						lin.event = Event.ADDITIVE_TRANSFER;
 						rc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
-						System.out.println("Could not replace from: " + lin.sigma + ", to " + lin.abstime);
+						System.out.println("Could not replace from: " + lin.sigma + " at " + lin.abstime);
 					}
 										
 				} else {
@@ -242,7 +242,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					} else {
 						lin.event = Event.ADDITIVE_TRANSFER;
 						lc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
-						System.out.println("Could not replace from: " + lin.sigma + ", to: " + lin.abstime);
+						System.out.println("Could not replace from: " + lin.sigma + " at " + lin.abstime);
 					}
 				}
 				
