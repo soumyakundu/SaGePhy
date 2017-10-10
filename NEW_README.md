@@ -18,27 +18,25 @@
 
 1. Every time a vertex is assigned a transfer event using a pseudorandom number generator, a new pseudorandom number generator is used to generate a random value that is used to choose between additive and replacing transfers.
 
-2. The default probability of a replacing transfer is 0.7, but that number can be changed by the user.
+2. The default probability of a replacing transfer is 0.5, but that number can be changed by the user.
 
 3. If an additive transfer is chosen, then the simulation proceeds as usual.
 
-4. If a replacing transfer is chosen, then after performing all actions performed for the case of an additive transfer, the vertex with the replacing transfer event is added to a NavigableMap<Double, GuestVertex> where the key is the event time and the value is the vertex itself.
+4. If a replacing transfer is chosen, then the vertex with the replacing transfer event is added to a NavigableMap<Double, GuestVertex> where the key is the event time and the value is the vertex itself.
 
-5. The NavigableMap is used to order the replacing transfer vertices by their event times.
+5. The NavigableMap is used to order the replacing transfer vertices in decreasing order of their event times.
 
-6. After the guest tree is generated, the vertices in the NavigableMap are added to an ArrayList in decreasing order of event times in order to ensure that a replacing transfer that is processed later does not replace a previously processed replacing transfer lineage or its ancestor.
+6. After the rest of the guest tree is generated, for the first vertex in the NavigableMap, a contemporary guest tree lineage suitable to be the receipient of the transfer is sampled, such that the guest tree lineage cannot be a child of the replacing transfer lineage and that the guest tree lineage must have an event time lower than that for the replacing transfer lineage.
 
-7. For each vertex in the ArrayList, a guest tree lineage in the host tree edge to which the transfer has occured is searched, such that the guest tree lineage cannot be a child of the replacing transfer lineage and that the guest tree lineage must have an event time lower than that for the replacing transfer lineage.
+7. If such a guest tree lineage is found, then the event for that lineage is changed to a replacing loss, while its event time is changed to that of the replacing transfer.
 
-8. If such a guest tree lineage is found, then the event for that lineage is changed to a replacing loss, while its event time is changed to that of the replacing transfer.
+8. After that, all of the other replacing transfers that have not been processed yet are checked to see if they are in the subtree of the replacing loss lineage; if any are found to be in its subtree, then those replacing transfers are removed as they are now in the subtree of a lost lineage.
 
-9. After that, all of the other replacing transfers that have not been processed yet are checked to see if they are in the subtree of the replacing loss lineage; if any are found to be in its subtree, then those replacing transfers are added to an invalidated ArrayList that every processed replacing transfer is checked against to make sure that no replacing losses are invoked for a replacing transfer that could not have happened since it is now in the subtree of a lost lineage.
+9. Finally, the replacing loss lineage's children pointer is set to null and the subtree of the replacing transfer is generated using the birth-death process.
 
-10. Finally, the replacing loss lineage's children pointer is set to null and the processed replacing transfer is removed from the ArrayList.
+10. If no suitable recipient for the replacing transfer is found, then the replacing transfer's event is changed to additive transfer to better reflect the true nature of the event; this happens very rarely.
 
-11. If a suitable guest tree lineage is not found for replacement within the chosen host tree lineage, then another host tree lineage from the same epoch is selected at random to be the new recipient for the replacing transfer; this continues until there are no other host tree lineages that can be a suitable recipient for the replacing transfer.
-
-12. If no suitable recipient for the replacing transfer is found, then the replacing transfer's event is changed to additive transfer to better reflect the true nature of the event.
+11. This process continues until there are no vertices left to process.
 
 ---
 
