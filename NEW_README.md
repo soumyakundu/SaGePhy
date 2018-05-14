@@ -64,3 +64,28 @@
 
 ---
 
+## Feature 3: Sampling Location of Gene Birth on Species Tree
+
+---
+
+### Overview:
+
+* The gene tree simulation process has been modified to sample with biased probabilities a location on the species tree from where the gene tree will start to evolve.
+
+* Previously, the gene tree was always evolved from the root of the species tree.
+
+* We bias the selection gene birth locus towards the top of the species tree with a non-zero probability of not picking the species tree root.
+
+---
+
+### Method:
+
+1. For k vertices in the species tree, construct a NavigableMap of values corresponding to Euler's number raised to the negative value of the index of the vertex divided by a constant such as 2 or 5.
+
+2. The keys are the running total of the values and the values for the NavigableMap are the vertex numbers between 0 and k.
+
+3. Choose a random value between 0 and the highest value in the NavigableMap and pick the vertex with a value immediately higher than the sampled value.
+
+4. Return k - 1 - (sampled vertex) to return the sampled root, as the vertices of the tree are numbered in post-order with k being the value of the root and 0 being one of the leaves.
+
+---
