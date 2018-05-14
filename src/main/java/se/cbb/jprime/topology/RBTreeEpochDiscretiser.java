@@ -4,9 +4,13 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
+import java.math.BigDecimal;
 
 import se.cbb.jprime.io.NewickIOException;
 import se.cbb.jprime.io.NewickTreeWriter;
+import se.cbb.jprime.math.PRNG;
 import se.cbb.jprime.mcmc.ChangeInfo;
 import se.cbb.jprime.mcmc.Dependent;
 import se.cbb.jprime.mcmc.InfoProvider;
@@ -16,7 +20,7 @@ import se.cbb.jprime.mcmc.ProperDependent;
  * Encapsulates a rooted bifurcating (host) tree where the tip of the top time arc and interior vertices
  * have given rise to a slicing of the tree into contemporary "epochs" of arcs (every epoch
  * is bounded above or below of a vertex or the host tree tip, and no vertices appear
- * within an epoch). 
+ * within an epoch).
  * Moreover, each epoch has, time-wise, been sliced further into several segments,
  * The top time of the tree is required to be
  * greater than 0 (i.e. there must be a top time arc).
@@ -30,30 +34,30 @@ import se.cbb.jprime.mcmc.ProperDependent;
  * i-1 below, the "split arc" at index j in epoch i stems from arcs j and j+1 in
  * epoch i-1. An arc k, k<j, in epoch i has index k in epoch i-1. An arc k, k>j, in
  * epoch i has index k+1 in epoch i-1.
- * 
+ *
  * @author Joel Sjöstrand.
  */
 public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDependent, InfoProvider {
-	
+
 	/** Discretisation type. */
 	public static final String DISC_TYPE = "RBTreeEpochDiscretiser";
-	
+
 	/**
 	 * Minimum time span for a epoch. If smaller than this, one of the "time-colliding"
 	 * epoch borders is moved slightly. Should work for any number of time-colliding vertices
 	 * (leaves not considered, naturally).
 	 */
 	public static final double MIN_SPLICE_DELTA = 0.0001;
-	
+
 	/** The underlying original tree. */
 	private RBTree S;
-	
+
 	/** Host tree names. */
 	private NamesMap names;
-	
+
 	/** Ultrametric times (or similarly) of tree. */
 	private TimesMap times;
-	
+
 	/** Minimum number of slices per epoch. */
 	private int nmin;
 
@@ -62,26 +66,26 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 
 	/** Approximate (never exceeded) timestep. */
 	private double deltat;
-	
+
 	/** Number of slices for the arc/epoch leading into the root. -1 if not overridden. */
 	private int nroot;
-	
+
 	/** Epochs. */
 	private Epoch[] epochs;
-	
+
 	/** For each epoch, the index of the arc in the epoch leading to split below. */
 	private int[] splits;
-	
+
 	/** For each vertex, the index of the epoch which the vertex is the lower end of. */
 	private IntMap vertexToEpoch;
-	
+
 	/** Cache. */
 	private Epoch[] epochsCache = null;
-	
+
 	/** Cache. */
 	private int[] splitsCache = null;
-	
-	
+
+
 	/**
 	 * Special constructor for when there is a single discretisation interval (leading to one midpoint discretisation point).
 	 * @param S host tree.
@@ -100,7 +104,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		update();
 		//setDistance(distances);
 	}
-	
+
 	/**
 	 * Constructor. The user specifies a discretisation sub-division of each epoch. Requires at least 2 discretisation intervals.
 	 * @param S host tree.
@@ -134,35 +138,35 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		update();
 		//setDistance(distances);
 	}
-		
+
 	/**
 	 * Updates the discretisation based on the underlying host tree.
 	 */
-	
+
 	public void update() {
 		epochs = new Epoch[(S.getNoOfVertices()+1)/2];
 		splits = new int[epochs.length];
-		
+
 		// Lowermost epoch contains all leaf arcs. Use these as starting point.
 		LinkedList<Integer> q = new LinkedList<Integer>();
 		addLeavesLeftToRight(q, S.getRoot());
 		for (int x : q) {
 			vertexToEpoch.set(x, 0);  // Epoch index of all leaves.
 		}
-	
+
 		int xLo = q.peekFirst();                   // Lower vertex of epoch.
 		double tLo = times.getVertexTime(xLo);     // Lower time of epoch.
 		double tUp;                                // Upper time of epoch.
-		
+
 		//System.out.println("Species Tree:");
-			
+
 		// Find epochs.
 		int epochNo = 0;
 		splits[0] = -1;          // Undefined, since leaf epoch.
 		while (q.size() > 1) {
 			int xUpIdx = -1;
 			tUp = Double.MAX_VALUE;
-			
+
 			// Find upper boundary of current epoch.
 			int j = 0;
 			for (int x : q) {
@@ -173,23 +177,23 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 				}
 				++j;
 			}
-			
+
 			// Make sure there is at least a certain timespan for each epoch.
 			if (tUp + MIN_SPLICE_DELTA < tLo) {
 				tUp = tLo + MIN_SPLICE_DELTA;
 			}
 			assert(tLo < tUp);
-			
+
 			// Create epoch, etc.
 			int noOfIvs = Math.min(Math.max(this.nmin, (int) Math.ceil((tUp - tLo) / this.deltat - 1e-6)), this.nmax);
 			epochs[epochNo] = new Epoch(epochNo, q, tLo, tUp, noOfIvs, this);
 			splits[epochNo + 1] = xUpIdx;
 			vertexToEpoch.set(xLo, epochNo);
-			
+
 			// Update arcs for next epoch. IMPORTANT: Note "order conservation".
-			
+
 			//System.out.println(q);
-			
+
 			int par = this.S.getParent(q.remove(xUpIdx));   // Remove left child arc.
 			q.add(xUpIdx, par);           // Insert parent arc where child arcs were originally placed.
 			q.remove(xUpIdx + 1);         // Remove right child arc.
@@ -197,13 +201,13 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 			tLo = tUp;
 			epochNo++;
 		}
-		
+
 		//System.out.println(q);
 		//System.out.println("-------------------------");
-		
+
 		// Only the root should now remain.
 		assert(q.size() == 1 && xLo == q.peekFirst() && xLo == S.getRoot());
-		
+
 		// Add epoch for top time arc.
 		tUp = times.getVertexTime(S.getRoot()) + times.getArcTime(S.getRoot());
 		if (tUp + MIN_SPLICE_DELTA < tLo) {
@@ -215,15 +219,15 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		epochs[epochNo] = new Epoch(epochNo, q, tLo, tUp, noOfIvs, this);
 		vertexToEpoch.set(xLo, epochNo);      // Actually undefined, since top time arc.
 	}
-	
+
 	/** Calculates phylogenetic distance between transfer donor and candidate for transfer recipient. */
-	
+
 	public double getDistance(int x, int y, double eventTime) {
 		int LCA = S.getLCA(x, y);
 		double distance = 2.0 * (this.getVertexTime(LCA) - eventTime);
 		return distance;
 	}
-	
+
 	/**
 	 * Returns the epoch at a specified index. Index 0 corresponds to epoch at leaves.
 	 * @param epochNo the epoch identifier.
@@ -232,7 +236,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public Epoch getEpoch(int epochNo) {
 		return epochs[epochNo];
 	}
-		
+
 	/**
 	 * Returns the discretised root-to-leaf-time. Note: Don't use the tree's own value
 	 * directly, since it may not be exactly the same as the discretised value.
@@ -241,7 +245,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public double getRootToLeafTime() {
 		return epochs[epochs.length-1].getLowerTime();
 	}
-	
+
 	/**
 	 * Returns the discretised tip-to-leaf-time. Note: Don't use the tree's own value
 	 * directly, since it may not be exactly the same as the discretised value.
@@ -250,7 +254,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public double getTipToLeafTime() {
 		return epochs[epochs.length-1].getUpperTime();
 	}
-	
+
 	/**
 	 * Returns the discretised time of a vertex. Note: Don't use the vertex' own time
 	 * directly, since it may not be exactly the same as the discretised value.
@@ -260,7 +264,11 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public double getVertexTime(int x) {
 		return epochs[vertexToEpoch.get(x)].getLowerTime();
 	}
-	
+
+	public double getVertexUpperTime(int x) {
+		return epochs[vertexToEpoch.get(x)].getUpperTime();
+	}
+
 	/**
 	 * Returns a discretised time.
 	 * @param epochNo the epoch identifier.
@@ -270,7 +278,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public double getTime(int epochNo, int idx) {
 		return epochs[epochNo].getTime(idx);
 	}
-	
+
 	/**
 	 * Returns the discretised timespan of an arc. Note: Don't use the underlying tree's own time
 	 * directly, since it may not be exactly the same as the discretised value.
@@ -283,7 +291,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		}
 		return (epochs[vertexToEpoch.get(this.S.getParent(x))].getLowerTime() - epochs[vertexToEpoch.get(x)].getLowerTime());
 	}
-	
+
 	/**
 	 * Returns a discretised timespan. Do not confuse with getEpochTimestep().
 	 * @param epochNo the epoch identifier.
@@ -292,7 +300,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public double getEpochTimespan(int epochNo) {
 		return epochs[epochNo].getTimespan();
 	}
-		
+
 	/**
 	 * Returns the epoch identifier above a specified vertex.
 	 * @param x the lower end of the epoch.
@@ -301,7 +309,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public int getEpochNoAbove(int x) {
 		return vertexToEpoch.get(x);
 	}
-	
+
 	/**
 	 * Returns the epoch above a specified vertex.
 	 * @param x the lower end of the epoch.
@@ -320,7 +328,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public int getEpochNoBelow(int x) {
 		return (vertexToEpoch.get(x) - 1);
 	}
-	
+
 	/**
 	 * Returns the epoch below a specified vertex.
 	 * Undefined for leaves.
@@ -330,10 +338,10 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public Epoch getEpochBelow(int x) {
 		return (this.epochs[vertexToEpoch.get(x) - 1]);
 	}
-		
+
 	/**
 	 * Returns the total number of epochs.
-	 * @return the number of epochs. 
+	 * @return the number of epochs.
 	 */
 	public int getNoOfEpochs() {
 		return epochs.length;
@@ -347,7 +355,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public int getNoOfArcs(int epochNo) {
 		return epochs[epochNo].getNoOfArcs();
 	}
-		
+
 	/**
 	 * Returns the timestep of a certain epoch. Do not confuse with getEpochTimespan().
 	 * @param epochNo the epoch identifier.
@@ -356,7 +364,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public double getEpochTimestep(int epochNo) {
 		return epochs[epochNo].getTimestep();
 	}
-		
+
 	/**
 	 * Returns the smallest timestep among the epochs.
 	 * @return the smallest timestep.
@@ -371,7 +379,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		return rec;
 	}
 
-		
+
 	/**
 	 * Returns the number of discretised times of the entire tree.
 	 * @param unique if false, counts epoch-epoch boundary times
@@ -383,10 +391,10 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		for (Epoch ep : this.epochs) {
 			sum += ep.getTimes().length;
 		}
-		if (unique) { sum -= (epochs.length - 1); } 
+		if (unique) { sum -= (epochs.length - 1); }
 		return sum;
 	}
-		
+
 	/**
 	 * Returns the total number of points in the
 	 * entire tree, all endpoints included (meaning that time-coinciding ones
@@ -400,7 +408,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		}
 		return sum;
 	}
-		
+
 	/**
 	 * With respect to an epoch's arc vector, returns
 	 * the index of the arc splitting at the epoch's
@@ -412,7 +420,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public int getSplitIndex(int epochNo) {
 		return splits[epochNo];
 	}
-		
+
 	/**
 	 * Returns the discretised time identifier of
 	 * the very tip of the top time arc.
@@ -421,7 +429,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public int[] getEpochPtAtTop() {
 		return new int[] { epochs.length-1, epochs[epochs.length-1].getNoOfTimes()-1 };
 	}
-		
+
 	/**
 	 * Returns the discretised time identifier
 	 * below another. Undefined for input
@@ -435,7 +443,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 				new int[] { epochNo-1, epochs[epochNo-1].getNoOfTimes()-1 } :
 				new int[] { epochNo, idx-1 });
 	}
-		
+
 	/**
 	 * Returns the discretised time identifier below another,
 	 * with the condition that their time values do not coincide,
@@ -450,7 +458,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 				new int[] { epochNo-1, epochs[epochNo-1].getNoOfTimes()-2} :
 				new int[] { epochNo, idx-1});
 	}
-		
+
 	/**
 	 * Returns the discretised time identifier above another.
 	 * @param epochNo the epoch identifier.
@@ -461,7 +469,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		return (idx + 1 >= epochs[epochNo].getNoOfTimes() ?
 				new int[] { epochNo + 1, 0} : new int[] {epochNo, idx + 1});
 	}
-		
+
 	/**
 	 * Returns the discretised time identifier above another,
 	 * with the condition that their time values do not coincide,
@@ -475,7 +483,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		return (idx + 1 >= epochs[epochNo].getNoOfTimes() ?
 				new int[] {epochNo + 1, 1} : new int[] {epochNo, idx + 1});
 	}
-		
+
 	/**
 	 * Returns the discretised time identifier above another,
 	 * with the condition that if the new value would be the last
@@ -488,7 +496,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		return (idx + 2 >= epochs[epochNo].getNoOfTimes() ?
 				new int[] {epochNo + 1, 0} : new int[] {epochNo, idx + 1});
 	}
-		
+
 	/**
 	 * Returns true if the discretised time identifier is the
 	 * last of its epoch.
@@ -499,8 +507,8 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public boolean isLastEpochPt(int epochNo, int idx) {
 		return (idx + 1 == epochs[epochNo].getNoOfTimes());
 	}
-		
-	
+
+
 	/**
 	 * Recursive helper. Adds leaves of tree rooted at x from
 	 * left to right.
@@ -516,8 +524,8 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		}
 	}
 
-	
-	
+
+
 	@Override
 	public String getPreInfo(String prefix) {
 		StringBuilder sb = new StringBuilder(16536);
@@ -578,10 +586,10 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		this.epochsCache = this.epochs;
 		this.splitsCache = this.splits;
 		this.vertexToEpoch.cache(null);
-		
+
 		// We always update the lot.
 		this.update();
-		
+
 		// Set change info.
 		changeInfos.put(this, new ChangeInfo(this, "Full EpochDiscretiser update."));
 	}
@@ -603,7 +611,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		this.splits = this.splitsCache;
 		this.vertexToEpoch.restoreCache();
 	}
-		
+
 	@Override
 	public String toString() {
 		StringMap metas = new StringMap("Meta", this.S.getNoOfVertices());
@@ -638,7 +646,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public String serializeToNewickTree() {
 		return this.toString();
 	}
-	
+
 	/**
 	 * Returns the root.
 	 * @return the root.
@@ -646,7 +654,28 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public int getRoot() {
 		return this.S.getRoot();
 	}
-	
+
+	public int sampleRoot(PRNG prng) {
+		int k = this.S.getNoOfVertices();
+		BigDecimal total = new BigDecimal(0);
+		BigDecimal value;
+		NavigableMap<BigDecimal, Integer> expo = new TreeMap<BigDecimal, Integer>();
+		for (int i = 0; i < k; i++) {
+			double doubleValue = (Math.pow(Math.E, (-1.0 * i) / 2));
+			value = BigDecimal.valueOf(doubleValue);
+			total = total.add(value);
+			expo.put(total, i);
+		}
+		total = expo.lastKey();
+		BigDecimal rand;
+		do {
+			rand = total.multiply(BigDecimal.valueOf(prng.nextDouble()));
+		} while (rand == total);
+		int root = expo.higherEntry(rand).getValue();
+		root = k - 1 - root;
+		return root;
+	}
+
 	/**
 	 * Checks true if root.
 	 * @param x vertex.
@@ -655,7 +684,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public boolean isRoot(int x) {
 		return this.S.isRoot(x);
 	}
-	
+
 	/**
 	 * Checks true if leaf.
 	 * @param x vertex.
@@ -664,7 +693,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public boolean isLeaf(int x) {
 		return this.S.isLeaf(x);
 	}
-	
+
 	/**
 	 * Returns the left child of x.
 	 * @param x the vertex.
@@ -673,7 +702,7 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public int getLeftChild(int x) {
 		return this.S.getLeftChild(x);
 	}
-	
+
 	/**
 	 * Returns the right child of x.
 	 * @param x the vertex.
@@ -690,5 +719,5 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public List<Integer> getLeaves() {
 		return this.S.getLeaves();
 	}
-	
+
 }
