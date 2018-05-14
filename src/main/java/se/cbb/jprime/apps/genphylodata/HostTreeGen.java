@@ -16,7 +16,7 @@ import se.cbb.jprime.misc.Pair;
 
 /**
  * Generates a synthetic bifurcating tree ("species tree") by means of a BD process or similarly.
- * 
+ *
  * @author Joel Sjöstrand.
  */
 public class HostTreeGen implements JPrIMEApp {
@@ -28,7 +28,7 @@ public class HostTreeGen implements JPrIMEApp {
 
 	@Override
 	public void main(String[] args) throws Exception {
-		
+
 		try {
 			// ================ PARSE USER OPTIONS AND ARGUMENTS ================
 			HostTreeGenParameters params = new HostTreeGenParameters();
@@ -68,7 +68,7 @@ public class HostTreeGen implements JPrIMEApp {
 				System.out.println(sb.toString());
 				return;
 			}
-			
+
 			// Create hostTree.
 			double T = params.getT();
 			String S;
@@ -79,15 +79,15 @@ public class HostTreeGen implements JPrIMEApp {
 				S = "H0:" + T + ";";
 			}
 			PrIMENewickTree host = PrIMENewickTreeReader.readTree(S, false, true);
-			
+
 			// Machine.
 			int minper = (params.bifurcationStart ? 1 : 0);
 			GuestTreeMachina machine = new GuestTreeMachina(params.seed, params.min, params.max, minper, Integer.MAX_VALUE, params.getLeafSizes(), params.maxAttempts,
 						params.vertexPrefix, params.excludeMeta, false);
-			
+
 			// Primus motor.
-			GuestTreeInHostTreeCreator motor = new GuestTreeInHostTreeCreator(host, params.getBirthRate(), params.getDeathRate(), 0.0, 0.0, "", params.getLeafSamplingProb(), null);
-			
+			GuestTreeInHostTreeCreator motor = new GuestTreeInHostTreeCreator(host, params.getBirthRate(), params.getDeathRate(), 0.0, 0.0, "", true, params.getLeafSamplingProb(), null);
+
 			Pair<PrIMENewickTree, PrIMENewickTree> guestTree = null;
 			try {
 				guestTree = machine.sampleGuestTree(motor);
@@ -100,7 +100,7 @@ public class HostTreeGen implements JPrIMEApp {
 				System.err.println("Failed to produce valid pruned tree within max allowed attempts.");
 				System.exit(0);
 			}
-			
+
 			// Fix stem override.
 			if (params.stem != null) {
 				guestTree.second.getRoot().setBranchLength(Double.parseDouble(params.stem));
@@ -108,7 +108,7 @@ public class HostTreeGen implements JPrIMEApp {
 					guestTree.first.getRoot().setBranchLength(Double.parseDouble(params.stem));
 				}
 			}
-			
+
 			// Print output.
 			if (params.doQuiet) {
 				if (params.excludeMeta) {
@@ -159,7 +159,7 @@ public class HostTreeGen implements JPrIMEApp {
 		int noOfDeaths = 0;
 		int noOfLeaves = 0;
 		double totalTime = 0.0;
-		
+
 		LinkedList<GuestVertex> vertices = new LinkedList<GuestVertex>();
 		if (tree != null) {
 			vertices.add((GuestVertex) tree.getRoot());
@@ -189,7 +189,7 @@ public class HostTreeGen implements JPrIMEApp {
 			}
 		}
 		totalTime = NumberManipulation.roundToSignificantFigures(totalTime, 8);
-		
+
 		sb.append("No. of vertices:\t").append(noOfVertices).append('\n');
 		sb.append("No. of extant leaves:\t").append(noOfLeaves).append('\n');
 		sb.append("No. of births:\t").append(noOfBirths).append('\n');

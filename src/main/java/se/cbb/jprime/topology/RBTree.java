@@ -17,32 +17,32 @@ import se.cbb.jprime.misc.IntQueue;
  * <p/>
  * Data such as leaf names, branch lengths, etc. are stored elsewhere.
  * Completely empty trees are not allowed.
- * 
+ *
  * @author Joel Sjöstrand.
  */
 public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParameter {
-	
+
 	/** Used to indicate null references. */
 	public static final int NULL = RootedBifurcatingTree.NULL;
-	
+
 	/** Name. */
 	protected String name;
-	
+
 	/** Parents. Note: parents[root] == NULL. */
 	protected int[] parents;
-	
+
 	/** Left children. Note: leftChildren[leaf] == NULL. */
 	protected int[] leftChildren;
-	
+
 	/** Right children. Note: rightChildren[leaf] == NULL. */
 	protected int[] rightChildren;
-	
+
 	/** For quick reference, the root index is stored explicitly. */
 	protected int root;
-	
+
 	/** Cache. */
 	protected RBTree cache = null;
-	
+
 	/**
 	 * Constructor. Creates a rooted tree from a Newick tree.
 	 * The input tree is required to be bifurcating, not empty, and have
@@ -79,7 +79,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 			}
 		}
 	}
-	
+
 	/**
 	 * Low-level constructor. Initialises all vertex references to NULL.
 	 * @param name the name of the tree parameter.
@@ -98,7 +98,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 		}
 		this.root = NULL;
 	}
-	
+
 	/**
 	 * Copy-constructor.
 	 * @param tree the tree to copy.
@@ -113,7 +113,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 		System.arraycopy(tree.rightChildren, 0, this.rightChildren, 0, tree.rightChildren.length);
 		this.root = tree.root;
 	}
-	
+
 	@Override
 	public String getName() {
 		return this.name;
@@ -123,7 +123,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	@Override
 	public int getRoot() {
 		return this.root;
@@ -167,7 +167,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 		}
 		return desc;
 	}
-	
+
 	@Override
 	public int getNoOfDescendants(int x, boolean properOnly) {
 		if (this.leftChildren[x] == NULL)
@@ -189,7 +189,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 		}
 		return list.size();
 	}
-	
+
 	@Override
 	public int getParent(int x) {
 		return this.parents[x];
@@ -218,7 +218,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 		}
 		return count;
 	}
-	
+
 	@Override
 	public List<Integer> getLeaves() {
 		int n = this.parents.length;
@@ -335,7 +335,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 	public int getNoOfChildren(int x) {
 		return (this.leftChildren[x] == NULL ? 0 : 2);
 	}
-	
+
 	@Override
 	public int getNoOfLeaves() {
 		return ((this.parents.length + 1) / 2);
@@ -365,7 +365,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 	public int getHeight() {
 		return getHeight(this.root);
 	}
-	
+
 	@Override
 	public int getHeight(int x) {
 		if (this.leftChildren[x] == NULL)
@@ -422,7 +422,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 	public int getNoOfSubParameters() {
 		return 1;
 	}
-	
+
 	/**
 	 * Caches the whole current tree. May e.g. be used by a <code>Proposer</code>.
 	 */
@@ -468,7 +468,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 		return this.toString();
 	}
 
-	
+
 	@Override
 	public String toString() {
 		// Only prints internal vertex labels.
@@ -478,7 +478,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 		sb.append(';');
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Recursively writes a Newick tree with the internal integer vertex labels.
 	 * @param sb string buffer to append to.
@@ -503,7 +503,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 		}
 		return (x == this.leftChildren[p] ? this.rightChildren[p] : this.leftChildren[p]);
 	}
-	
+
 	/**
 	 * Swap two vertices in the tree.
 	 * @param i vertex number.
@@ -526,7 +526,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 		this.leftChildren[j] = iTmp[1];
 		this.rightChildren[j] = iTmp[2];
 	}
-	
+
 	/**
 	 * Swap the number i and j in a list.
 	 * @param i number.
@@ -542,7 +542,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 			}
 		}
 	}
-	
+
 	/**
 	 * Low-level setter for internal parent and children arrays.
 	 * @param p parent vertex.
@@ -555,7 +555,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 		this.parents[lc] = p;
 		this.parents[rc] = p;
 	}
-	
+
 	/**
 	 * Low-level setter for root.
 	 * @param x new root vertex.
@@ -563,7 +563,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 	void setRoot(int x) {
 		this.root = x;
 	}
-	
+
 	/**
 	 * Low-level setter for copying the topology of another tree. At the moment only handles equally big trees.
 	 * @param tree the tree from which the new topology is mimicked.
@@ -574,12 +574,12 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 		System.arraycopy(tree.rightChildren, 0, this.rightChildren, 0, tree.rightChildren.length);
 		this.root = tree.root;
 	}
-	
+
 	@Override
 	public List<Integer> getTopologicalOrdering() {
 		return this.getTopologicalOrdering(this.root);
 	}
-	
+
 	@Override
 	public List<Integer> getTopologicalOrdering(int source) {
 		ArrayList<Integer> l = new ArrayList<Integer>(this.parents.length);
