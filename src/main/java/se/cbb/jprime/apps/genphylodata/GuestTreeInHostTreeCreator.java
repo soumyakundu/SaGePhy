@@ -126,7 +126,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		//root = this.createGuestVertex(myRoot, hostTree.getVertexUpperTime(myRoot), prng);
 		//System.out.println(hostTree.getVertexUpperTime(myRoot));
 		//System.out.println(hostTree.getTipToLeafTime());
-		System.out.println(myRoot);
+		//System.out.println(myRoot);
 		alive.add(root);
 
 		// Recursively process lineages.
