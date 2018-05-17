@@ -661,10 +661,12 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		BigDecimal value;
 		NavigableMap<BigDecimal, Integer> expo = new TreeMap<BigDecimal, Integer>();
 		for (int i = 0; i < k; i++) {
-			double doubleValue = (Math.pow(Math.E, (-1.0 * i) / 2));
+			double doubleValue = (5 * Math.pow(Math.E, (-1.0 * (this.getTipToLeafTime() - this.getVertexTime(i)))));
 			value = BigDecimal.valueOf(doubleValue);
 			total = total.add(value);
 			expo.put(total, i);
+			//System.out.println(this.getVertexTime(i));
+			//System.out.println(value);
 		}
 		total = expo.lastKey();
 		BigDecimal rand;
@@ -673,6 +675,8 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		} while (rand == total);
 		int root = expo.higherEntry(rand).getValue();
 		root = k - 1 - root;
+		//System.out.println(root);
+		//System.out.println(this.getVertexTime(root));
 		return root;
 	}
 
