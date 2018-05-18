@@ -112,6 +112,10 @@ public class GuestTreeGenParameters {
 	/** Type of distance bias for transfers. */
 	@Parameter(names = {"-db", "--distance-bias"}, description = "Type of distance-bias for horizontal gene transfers. Options: none, simple, exponential.")
 	public String distance_bias = "simple";
+	
+	/** Coefficient for sampling gene tree birth location. */
+	@Parameter(names = {"-gb", "--sample-gene-birth"}, description = "Set level of bias towards root of species tree for gene tree birth location")
+	public String gene_birth = "0.0";
 
 	/**
 	 * Returns output and info streams.
@@ -134,7 +138,7 @@ public class GuestTreeGenParameters {
 		} else {
 			host = PrIMENewickTreeReader.readTree(args.get(0), false, true);
 		}
-		return new GuestTreeInHostTreeCreator(host, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getReplacingTransferRate(), this.distance_bias, false, this.getLeafSamplingProb(), this.getStem());
+		return new GuestTreeInHostTreeCreator(host, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getReplacingTransferRate(), this.distance_bias, this.getGeneBirthSampling(), false, this.getLeafSamplingProb(), this.getStem());
 	}
 
 	public double getDuplicationRate() {
@@ -171,6 +175,10 @@ public class GuestTreeGenParameters {
 
 	public Double getReplacingTransferRate() {
 		return Double.parseDouble(this.replacing_transfers);
+	}
+	
+	public Double getGeneBirthSampling() {
+		return Double.parseDouble(this.gene_birth);
 	}
 
 	public GuestTreeInHybridGraphCreator getHostHybridGraphCreator() throws GMLIOException, IOException {

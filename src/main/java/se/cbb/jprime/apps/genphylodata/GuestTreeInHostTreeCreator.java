@@ -51,6 +51,9 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 	/** Transfer distance bias. */
 	private String distance_bias;
+	
+	/** Gene birth sampling bias. */
+	private double gene_birth;
 
 	/** Host Tree or Guest Tree. */
 	private boolean ishost;
@@ -69,7 +72,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	 * @throws NewickIOException.
 	 */
 
-	public GuestTreeInHostTreeCreator(PrIMENewickTree host, double lambda, double mu, double tau, double theta, String distance_bias, boolean ishost, double rho, Double stem) throws TopologyException, NewickIOException {
+	public GuestTreeInHostTreeCreator(PrIMENewickTree host, double lambda, double mu, double tau, double theta, String distance_bias, double gene_birth, boolean ishost, double rho, Double stem) throws TopologyException, NewickIOException {
 
 		// Host tree.
 		RBTree S = new RBTree(host, "HostTree");
@@ -92,6 +95,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		this.tau = tau;
 		this.theta = theta;
 		this.distance_bias = distance_bias;
+		this.gene_birth = gene_birth;
 		this.ishost = ishost;
 		this.rho = rho;
 		if (lambda < 0 || mu < 0 || tau < 0) {
@@ -118,15 +122,18 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		if (this.ishost == true) {
 			myRoot = hostTree.getRoot();
 			root = this.createGuestVertex(myRoot, hostTree.getTipToLeafTime(), prng);
-		} else {
-			myRoot = hostTree.sampleRoot(prng);
+		} else if (this.gene_birth != 0) {
+			myRoot = hostTree.sampleRoot(prng, this.gene_birth);
 			root = this.createGuestVertex(myRoot, hostTree.getVertexUpperTime(myRoot), prng);
+		} else {
+			myRoot = hostTree.getRoot();
+			root = this.createGuestVertex(myRoot, hostTree.getTipToLeafTime(), prng);
 		}
 		//myRoot = 189;
 		//root = this.createGuestVertex(myRoot, hostTree.getVertexUpperTime(myRoot), prng);
 		//System.out.println(hostTree.getVertexUpperTime(myRoot));
 		//System.out.println(hostTree.getTipToLeafTime());
-		//System.out.println(myRoot);
+		System.out.println(myRoot);
 		alive.add(root);
 
 		// Recursively process lineages.

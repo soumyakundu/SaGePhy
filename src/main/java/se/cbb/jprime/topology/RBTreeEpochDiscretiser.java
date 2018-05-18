@@ -655,28 +655,26 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		return this.S.getRoot();
 	}
 
-	public int sampleRoot(PRNG prng) {
+	public int sampleRoot(PRNG prng, double gene_birth) {
 		int k = this.S.getNoOfVertices();
 		BigDecimal total = new BigDecimal(0);
 		BigDecimal value;
 		NavigableMap<BigDecimal, Integer> expo = new TreeMap<BigDecimal, Integer>();
 		for (int i = 0; i < k; i++) {
-			double doubleValue = (5 * Math.pow(Math.E, (-1.0 * (this.getTipToLeafTime() - this.getVertexTime(i)))));
+			double doubleValue = Math.pow(Math.E, (-1.0 * gene_birth * (this.getTipToLeafTime() - this.getVertexTime(i))));
 			value = BigDecimal.valueOf(doubleValue);
 			total = total.add(value);
 			expo.put(total, i);
-			//System.out.println(this.getVertexTime(i));
-			//System.out.println(value);
+			//System.out.println(this.getVertexTime(i) + ": " + total);
 		}
 		total = expo.lastKey();
 		BigDecimal rand;
 		do {
 			rand = total.multiply(BigDecimal.valueOf(prng.nextDouble()));
 		} while (rand == total);
+		//System.out.println(rand);
 		int root = expo.higherEntry(rand).getValue();
-		root = k - 1 - root;
-		//System.out.println(root);
-		//System.out.println(this.getVertexTime(root));
+		//System.out.println("Root - " + root + ": " + this.getVertexTime(root));
 		return root;
 	}
 
