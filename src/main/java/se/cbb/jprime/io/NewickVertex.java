@@ -35,6 +35,8 @@ public class NewickVertex {
 	/** Child vertices. */
 	private ArrayList<NewickVertex> children = null;
 	
+	protected Integer host_vertex;
+	
 	/**
 	 * Constructor. Creates an empty vertex.
 	 */
@@ -93,6 +95,14 @@ public class NewickVertex {
 	 */
 	public void setNumber(int number) {
 		this.number = number;
+	}
+	
+	public int getHostVertex() {
+		return this.host_vertex;
+	}
+	
+	public void setHostVertex(int host_vertex) {
+		this.host_vertex = host_vertex;
 	}
 	
 	/**

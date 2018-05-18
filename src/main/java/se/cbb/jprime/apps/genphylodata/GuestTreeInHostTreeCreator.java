@@ -144,6 +144,9 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			//System.out.println("-------------------------");
 
 			GuestVertex lin = alive.pop();
+			
+			//System.out.println("Host: " + lin.getHostVertex());
+			
 			if (lin.event == Event.LOSS || lin.event == Event.REPLACING_LOSS || lin.event == Event.LEAF || lin.event == Event.UNSAMPLED_LEAF) {
 				// Lineage ends.
 				if (alive.isEmpty()) {

@@ -75,6 +75,7 @@ public class GuestVertex extends NewickVertex {
 		super(-1, "", branchtime, "");
 		this.event = event;
 		this.sigma = sigma;
+		this.host_vertex = sigma;
 		this.epoch = epoch;
 		this.abstime = abstime;
 	}
@@ -88,6 +89,7 @@ public class GuestVertex extends NewickVertex {
 		this.event = orig.event;
 		this.abstime = orig.abstime;
 		this.sigma = orig.sigma;
+		this.host_vertex = orig.sigma;
 		this.epoch = orig.epoch;
 		this.prunability = orig.prunability;
 	}
@@ -146,6 +148,7 @@ public class GuestVertex extends NewickVertex {
 			StringBuilder sb = new StringBuilder(1024);
 			sb.append("[&&PRIME");
 			sb.append(" ID=").append(v.getNumber());
+			sb.append(" HOST=").append(v.getHostVertex());
 			switch (v.event) {
 			case DUPLICATION:
 				double [] disTimes= v.epoch.getTimes();

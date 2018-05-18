@@ -56,6 +56,7 @@ public class PrIMENewickTree extends NewickTree {
 		TREE_NAME               ("NAME=\"?(\\w+)\"?"),
 		TREE_TOP_TIME           ("TT=\"?([0-9\\+\\-\\.eE]+)\"?"),
 		VERTEX_NUMBERS          ("ID=\"?([0-9]+)\"?"),
+		VERTEX_HOST				("HOST=\"?([0-9]+)\"?"),
 		VERTEX_NAMES            ("NAME=\"?(\\w+)\"?"),
 		BRANCH_LENGTHS          ("BL=\"?([0-9\\+\\-\\.eE]+)\"?"),
 		ORIGINAL_BRANCH_LENGTHS ("ORIGBL=\"?([0-9\\+\\-\\.eE]+)\"?"),
@@ -222,6 +223,8 @@ public class PrIMENewickTree extends NewickTree {
 			return (this.treeTopTime != null);
 		case VERTEX_NUMBERS:
 			return true;
+		case VERTEX_HOST:
+			return true;
 		case VERTEX_NAMES:
 			return this.hasVertexNames;
 		case BRANCH_LENGTHS:
@@ -312,6 +315,15 @@ public class PrIMENewickTree extends NewickTree {
 			x = Integer.parseInt(val);
 			n.setNumber(x);   // Override node value.
 		}
+
+		/**
+		int y = n.getHostVertex();
+		val = MetaProperty.VERTEX_HOST.getValue(meta);
+		if (val != null) {
+			y = Integer.parseInt(val);
+			n.setHostVertex(y);
+		}
+		*/
 		
 		// Read properties where "pure" and "meta" overlap. Let the latter override.
 		if (n.hasName()) { this.hasVertexNames = true; }
