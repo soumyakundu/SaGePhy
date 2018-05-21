@@ -114,8 +114,11 @@ public class GuestTreeGenParameters {
 	public String distance_bias = "simple";
 	
 	/** Coefficient for sampling gene tree birth location. */
-	@Parameter(names = {"-gb", "--sample-gene-birth"}, description = "Set level of bias towards root of species tree for gene tree birth location")
-	public String gene_birth = "0.0";
+	@Parameter(names = {"-gbc", "--gene-birth-coefficient"}, description = "Set level of bias towards root of species tree for gene tree birth location")
+	public String gene_birth = "1.0";
+	
+	@Parameter(names = {"-gb", "--gene-birth-sampling"}, description = "Randomly sample location of gene birth on species tree")
+	public Boolean doGeneBirth = false;
 
 	/**
 	 * Returns output and info streams.
@@ -138,7 +141,7 @@ public class GuestTreeGenParameters {
 		} else {
 			host = PrIMENewickTreeReader.readTree(args.get(0), false, true);
 		}
-		return new GuestTreeInHostTreeCreator(host, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getReplacingTransferRate(), this.distance_bias, this.getGeneBirthSampling(), false, this.getLeafSamplingProb(), this.getStem());
+		return new GuestTreeInHostTreeCreator(host, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getReplacingTransferRate(), this.distance_bias, this.doGeneBirth, this.getGeneBirthSampling(), false, this.getLeafSamplingProb(), this.getStem());
 	}
 
 	public double getDuplicationRate() {

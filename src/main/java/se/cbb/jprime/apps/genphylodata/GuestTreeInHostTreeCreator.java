@@ -52,6 +52,8 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	/** Transfer distance bias. */
 	private String distance_bias;
 	
+	private Boolean doGeneBirth;
+	
 	/** Gene birth sampling bias. */
 	private double gene_birth;
 
@@ -72,7 +74,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	 * @throws NewickIOException.
 	 */
 
-	public GuestTreeInHostTreeCreator(PrIMENewickTree host, double lambda, double mu, double tau, double theta, String distance_bias, double gene_birth, boolean ishost, double rho, Double stem) throws TopologyException, NewickIOException {
+	public GuestTreeInHostTreeCreator(PrIMENewickTree host, double lambda, double mu, double tau, double theta, String distance_bias, boolean doGeneBirth, double gene_birth, boolean ishost, double rho, Double stem) throws TopologyException, NewickIOException {
 
 		// Host tree.
 		RBTree S = new RBTree(host, "HostTree");
@@ -95,6 +97,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		this.tau = tau;
 		this.theta = theta;
 		this.distance_bias = distance_bias;
+		this.doGeneBirth = doGeneBirth;
 		this.gene_birth = gene_birth;
 		this.ishost = ishost;
 		this.rho = rho;
@@ -122,7 +125,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		if (this.ishost == true) {
 			myRoot = hostTree.getRoot();
 			root = this.createGuestVertex(myRoot, hostTree.getTipToLeafTime(), prng);
-		} else if (this.gene_birth != 0) {
+		} else if (this.doGeneBirth != false) {
 			myRoot = hostTree.sampleRoot(prng, this.gene_birth);
 			root = this.createGuestVertex(myRoot, hostTree.getVertexUpperTime(myRoot), prng);
 		} else {

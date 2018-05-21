@@ -86,7 +86,7 @@ public class HostTreeGen implements JPrIMEApp {
 						params.vertexPrefix, params.excludeMeta, false);
 
 			// Primus motor.
-			GuestTreeInHostTreeCreator motor = new GuestTreeInHostTreeCreator(host, params.getBirthRate(), params.getDeathRate(), 0.0, 0.0, "", 0.0, true, params.getLeafSamplingProb(), null);
+			GuestTreeInHostTreeCreator motor = new GuestTreeInHostTreeCreator(host, params.getBirthRate(), params.getDeathRate(), 0.0, 0.0, "", false, 0.0, true, params.getLeafSamplingProb(), null);
 
 			Pair<PrIMENewickTree, PrIMENewickTree> guestTree = null;
 			try {

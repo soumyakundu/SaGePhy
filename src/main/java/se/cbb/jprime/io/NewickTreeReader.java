@@ -214,12 +214,15 @@ public class NewickTreeReader {
 		String meta = readMeta(q);
 		n.setValues(-1, name, branchLength, meta);
 		Pattern p = Pattern.compile("HOST=\"?([0-9]+)\"?");
-		Matcher m = p.matcher(meta);
-		if (m.find()) {
-			n.setHostVertex(Integer.parseInt(m.group(1)));
+		Matcher m;
+		if (meta != null) {
+			m = p.matcher(meta);
+			if (m.find()) {
+				n.setHostVertex(Integer.parseInt(m.group(1)));
+			}
 		}
 	}
-	
+		
 	/**
 	 * Parses according to &lt;name&gt;.
 	 * @param q remaining characters.
