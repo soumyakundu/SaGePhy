@@ -1,6 +1,8 @@
 package se.cbb.jprime.apps.genphylodata;
 
 import java.util.List;
+
+import se.cbb.jprime.io.NewickIOException;
 import se.cbb.jprime.math.PRNG;
 
 /**
@@ -14,8 +16,9 @@ public interface UnprunedGuestTreeCreator {
 	 * Creates an unpruned tree. Appropriate labelling of vertices may not be in place in the returned tree.
 	 * @param prng PRNG.
 	 * @return the root.
+	 * @throws NewickIOException 
 	 */
-	public GuestVertex createUnprunedTree(PRNG prng);
+	public GuestVertex createUnprunedTree(PRNG prng) throws NewickIOException;
 
 	/**
 	 * Returns the host leaves.

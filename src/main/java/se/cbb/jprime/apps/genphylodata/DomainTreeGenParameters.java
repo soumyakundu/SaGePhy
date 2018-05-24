@@ -107,21 +107,24 @@ public class DomainTreeGenParameters {
 
 	/** Rate of replacing transfers. */
 	@Parameter(names = {"-rt", "--replacing-transfers"}, description = "Probability of replacing horizontal gene transfers.")
-	public String replacing_transfers = "0.5";
+	public String replacing_transfers = "0.0";
 
 	/** Type of distance bias for transfers. */
 	@Parameter(names = {"-db", "--distance-bias"}, description = "Type of distance-bias for horizontal gene transfers. Options: none, simple, exponential.")
-	public String distance_bias = "simple";
+	public String distance_bias = "none";
 	
-	/** Coefficient for sampling gene tree birth location. */
-	@Parameter(names = {"-gb", "--sample-gene-birth"}, description = "Set level of bias towards root of species tree for gene tree birth location.")
-	public String gene_birth = "0.0";
+	/** Coefficient for sampling domain tree birth location. */
+	@Parameter(names = {"-dbc", "--domain-birth-coefficient"}, description = "Set level of bias towards root of gene tree for domain tree birth location")
+	public String domain_birth = "1.0";
 	
-	@Parameter(names = {"-ig", "--intra-gene-transfers"}, description = "Probability of transfers within the same gene tree.")
-	public String intra_gene = "1.0";
+	@Parameter(names = {"-dbs", "--domain-birth-sampling"}, description = "Randomly sample location of domain birth on gene tree")
+	public Boolean doDomainBirth = false;
 	
-	@Parameter(names = {"-is", "--intra-species-transfers"}, description = "Probability of transfers within the same species.")
-	public String intra_species = "1.0";
+	@Parameter(names = {"-ig", "--inter-gene-transfers"}, description = "Probability of transfers across gene trees.")
+	public String inter_gene = "0.0";
+	
+	@Parameter(names = {"-is", "--inter-species-transfers"}, description = "Probability of transfers across species.")
+	public String inter_species = "0.0";
 	
 	/**
 	 * Returns output and info streams.
@@ -153,7 +156,7 @@ public class DomainTreeGenParameters {
 				guests.add(PrIMENewickTreeReader.readTree(args.get(i), false, true));
 			}
 		}
-		return new DomainTreeInHostTreeCreator(host, guests, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getReplacingTransferRate(), this.distance_bias, this.getGeneBirthSampling(), false, this.getIntraGeneTransfers(), this.getIntraSpeciesTransfers(), this.getLeafSamplingProb(), this.getStem());
+		return new DomainTreeInHostTreeCreator(host, guests, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getReplacingTransferRate(), this.distance_bias, this.doDomainBirth, this.getDomainBirthSampling(), false, this.getInterGeneTransfers(), this.getInterSpeciesTransfers(), this.getLeafSamplingProb(), this.getStem());
 	}
 
 	public double getDuplicationRate() {
@@ -192,16 +195,16 @@ public class DomainTreeGenParameters {
 		return Double.parseDouble(this.replacing_transfers);
 	}
 	
-	public Double getGeneBirthSampling() {
-		return Double.parseDouble(this.gene_birth);
+	public Double getDomainBirthSampling() {
+		return Double.parseDouble(this.domain_birth);
 	}
 	
-	public Double getIntraGeneTransfers() {
-		return Double.parseDouble(this.intra_gene);
+	public Double getInterGeneTransfers() {
+		return Double.parseDouble(this.inter_gene);
 	}
 	
-	public Double getIntraSpeciesTransfers() {
-		return Double.parseDouble(this.intra_species);
+	public Double getInterSpeciesTransfers() {
+		return Double.parseDouble(this.inter_species);
 	}
 	
 	public GuestTreeInHybridGraphCreator getHostHybridGraphCreator() throws GMLIOException, IOException {

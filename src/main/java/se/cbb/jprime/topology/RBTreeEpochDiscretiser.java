@@ -268,6 +268,10 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 	public double getVertexUpperTime(int x) {
 		return epochs[vertexToEpoch.get(x)].getUpperTime();
 	}
+	
+	public RBTree getRBTree() {
+		return this.S;
+	}
 
 	/**
 	 * Returns a discretised time.

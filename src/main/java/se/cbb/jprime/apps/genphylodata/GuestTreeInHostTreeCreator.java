@@ -110,7 +110,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	}
 
 	@Override
-	public GuestVertex createUnprunedTree(PRNG prng) {
+	public GuestVertex createUnprunedTree(PRNG prng) throws NewickIOException {
 
 		// Currently processed lineages.
 		LinkedList<GuestVertex> alive = new LinkedList<GuestVertex>();
@@ -174,7 +174,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			} else if (lin.event == Event.ADDITIVE_TRANSFER) {
 				if (prng.nextDouble() < 0.5) {
 					lc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null);
+					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 					lin.setTransferedFromArc(lin.sigma);
 					rc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
 					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
@@ -183,7 +183,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 				} else {
 					rc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null);
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 					lin.setTransferedFromArc(lin.sigma);
 					lc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
 					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
@@ -194,7 +194,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			} else if (lin.event == Event.REPLACING_TRANSFER) {
 				if (prng.nextDouble() < 0.5) {
 					lc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null);
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 					lin.setTransferedFromArc(lin.sigma);
 					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
 
@@ -208,7 +208,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						}
 
 						if (emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)) {
-							lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, emptyArcs);
+							lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, emptyArcs, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 							node = findVertex(root, lin);
 						}
 					}
@@ -236,7 +236,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 				} else {
 					rc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null);
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 					lin.setTransferedFromArc(lin.sigma);
 					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
 
@@ -250,7 +250,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						}
 
 						if (emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)) {
-							lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, emptyArcs);
+							lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, emptyArcs, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 							node = findVertex(root, lin);
 						}
 					}
@@ -418,7 +418,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			}
 			epoch = this.hostTree.getEpoch(epno);
 		}
-		return new GuestVertex(event, X, epoch, eventTime, branchTime);
+		return new GuestVertex(event, X, epoch, eventTime, branchTime, this.hostTree);
 	}
 
 	@Override

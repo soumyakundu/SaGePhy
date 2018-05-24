@@ -220,6 +220,8 @@ public class NewickTreeReader {
 			if (m.find()) {
 				n.setHostVertex(Integer.parseInt(m.group(1)));
 			}
+		} else {
+			n.setHostVertex(0);
 		}
 	}
 		
