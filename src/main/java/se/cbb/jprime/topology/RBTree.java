@@ -42,6 +42,9 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 
 	/** Cache. */
 	protected RBTree cache = null;
+	
+	/** Newick tree. */
+	protected NewickTree tree;
 
 	/**
 	 * Constructor. Creates a rooted tree from a Newick tree.
@@ -56,6 +59,7 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 		this.parents = new int[k];
 		this.leftChildren = new int[k];
 		this.rightChildren = new int[k];
+		this.tree = tree;
 		NewickVertex root = tree.getRoot();
 		if (root == null)
 			throw new TopologyException("Cannot create RBTree from empty NewickTree.");
@@ -127,6 +131,10 @@ public class RBTree implements RootedTreeParameter, RootedBifurcatingTreeParamet
 	@Override
 	public int getRoot() {
 		return this.root;
+	}
+	
+	public NewickTree getNewickTree() {
+		return this.tree;
 	}
 
 	@Override

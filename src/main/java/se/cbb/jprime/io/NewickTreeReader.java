@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import se.cbb.jprime.misc.CharQueue;
 
 /**
@@ -211,8 +213,18 @@ public class NewickTreeReader {
 		Double branchLength = readBranchLength(q);
 		String meta = readMeta(q);
 		n.setValues(-1, name, branchLength, meta);
+		Pattern p = Pattern.compile("HOST=\"?([0-9]+)\"?");
+		Matcher m;
+		if (meta != null) {
+			m = p.matcher(meta);
+			if (m.find()) {
+				n.setHostVertex(Integer.parseInt(m.group(1)));
+			}
+		} else {
+			n.setHostVertex(0);
+		}
 	}
-	
+		
 	/**
 	 * Parses according to &lt;name&gt;.
 	 * @param q remaining characters.

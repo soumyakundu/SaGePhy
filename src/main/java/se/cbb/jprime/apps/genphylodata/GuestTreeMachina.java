@@ -92,7 +92,7 @@ public class GuestTreeMachina {
 					throw new MaxAttemptsException("" + attempts + " reached.");
 				}
 				
-				System.out.println("Tree: " + attempts);
+				//System.out.println("Tree: " + attempts);
 				
 				unprunedRoot = mightyGodPlaysDice.createUnprunedTree(this.prng);
 				int no = PruningHelper.labelUnprunableVertices(unprunedRoot, 0, vertexPrefix, appendSigma);

@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import org.jfree.util.PublicCloneable;
 
+import se.cbb.jprime.io.NewickIOException;
 import se.cbb.jprime.math.PRNG;
 
 /**
@@ -48,7 +49,7 @@ public class Epoch implements PublicCloneable {
 	/** Timestep between discretised times. Stored explicitly for speed. */
 	private double m_timestep;
 	
-	/** Random Arc selected fro transfer*/
+	/** Random Arc selected for transfer*/
 	private int transferedToArc = -1;
 	
 	/**
@@ -215,11 +216,11 @@ public class Epoch implements PublicCloneable {
 		return this.m_arcs[prng.nextInt(this.m_arcs.length)];
 	}
 	
-	public int getTranferedToArc(){
+	public int getTransferedToArc(){
 		return this.transferedToArc;
 	}
 	
-	public void setTranferedToArc(int arc){
+	public void setTransferedToArc(int arc){
 		this.transferedToArc= arc;
 	}
 	
@@ -243,61 +244,69 @@ public class Epoch implements PublicCloneable {
 	 * Samples an arc from the epoch, excluding a given arc.
 	 * @param prng PRNG.
 	 * @param excludeArc arc to exclude.
+	 * @throws NewickIOException 
 	 */
-	public int sampleArc(PRNG prng, int excludeArc, int fromArc, double eventTime, String distance_bias, ArrayList<Integer> emptyArcs) {
+	public int sampleArc(PRNG prng, int excludeArc, int fromArc, double eventTime, String distance_bias, ArrayList<Integer> emptyArcs, int hostArc, Boolean include) throws NewickIOException {
 		int arc;
 		if (this.m_arcs.length == 1 && excludeArc == m_arcs[0]) {
 			throw new IllegalArgumentException("Cannot exclude arc from sampling (it's the only one!): " + excludeArc);
 		}
 		if (!distance_bias.equals("none")) {
-			NavigableMap<BigDecimal, Integer> dist = setDistance(excludeArc, eventTime, distance_bias, emptyArcs);
-			BigDecimal total = dist.lastKey();
-			
-			//System.out.println("Final Total: " + total);
-			
-			BigDecimal rand;
-			
-			//System.out.println("Check A");
-			
-			do {
-				rand = total.multiply(BigDecimal.valueOf(prng.nextDouble()));
-				//System.out.println("Random: " + rand);
-			} while (rand == total);
-			
-			//System.out.println("Check B");
-			
-			arc = dist.higherEntry(rand).getValue();
+			NavigableMap<BigDecimal, Integer> dist = setDistance(excludeArc, eventTime, distance_bias, emptyArcs, hostArc, include);
+			if (dist.size() < 1) {
+				return -5;
+			} else {
+				BigDecimal total = dist.lastKey();			
+				BigDecimal rand;
+				do {
+					rand = total.multiply(BigDecimal.valueOf(prng.nextDouble()));
+				} while (rand == total);			
+				arc = dist.higherEntry(rand).getValue();
+			}
 		} else {
-			
-			//System.out.println(this.m_arcs);
-			//System.out.println("No Distance Bias");
-			
-			int to = prng.nextInt(this.m_arcs.length);
-			arc = this.m_arcs[to];
-			while (true) {
-				if (to != fromArc && arc != excludeArc) {
-					break;
+			ArrayList<Integer> same_host = new ArrayList<Integer>();
+			for (int x: m_arcs) {
+				int arcHost = this.tree.getRBTree().getNewickTree().getVertex(x).getHostVertex();
+				if (x != excludeArc && ((emptyArcs == null) ? true : (!emptyArcs.contains(x))) && (include ? (arcHost == hostArc) : (arcHost != hostArc))) {
+					same_host.add(x);
 				}
-				to = prng.nextInt(this.m_arcs.length);
-				arc = this.m_arcs[to];
+			}
+			if (same_host.size() < 1) {
+				return -5;
+			} else {
+				int to = prng.nextInt(same_host.size());
+				arc = same_host.get(to);
+				to = java.util.Arrays.asList(this.m_arcs).indexOf(arc);
+				int arcHost = this.tree.getRBTree().getNewickTree().getVertex(arc).getHostVertex();
+				while (true) {
+					//System.out.println("Recipient: " + arc + " - " + arcHost);
+					//System.out.println("Donor: " + excludeArc + " - " + hostArc);
+					if (to != fromArc && arc != excludeArc && ((emptyArcs == null) ? true : (!emptyArcs.contains(arc))) && (include ? (arcHost == hostArc) : (arcHost != hostArc))) {
+						break;
+					}
+					to = prng.nextInt(same_host.size());
+					arc = same_host.get(to);
+					to = java.util.Arrays.asList(this.m_arcs).indexOf(arc);
+					arcHost = this.tree.getRBTree().getNewickTree().getVertex(arc).getHostVertex();
+				}
 			}
 		}
-		this.setTranferedToArc(arc);
+		this.setTransferedToArc(arc);
 		return arc;
 	}
 	
-	/** Returns HashMap of phylogenetic distances to all lineages in the epoch eligible to receive transfers from given recipient. */	
+	/** Returns HashMap of phylogenetic distances to all lineages in the epoch eligible to receive transfers from given recipient. 
+	 * @throws NewickIOException */	
 	
-	public NavigableMap<BigDecimal, Integer> setDistance(int excludeArc, double eventTime, String distance_bias, ArrayList<Integer> emptyArcs) {
-		//System.out.println("Distance Bias");
+	public NavigableMap<BigDecimal, Integer> setDistance(int excludeArc, double eventTime, String distance_bias, ArrayList<Integer> emptyArcs, int hostArc, Boolean include) throws NewickIOException {
 		BigDecimal total = new BigDecimal(0);
 		BigDecimal value;
 		NavigableMap<BigDecimal, Integer> phy_dist = new TreeMap<BigDecimal, Integer>();
 		for (int x : m_arcs) {
-			if (x != excludeArc) {
+			int arcHost = this.tree.getRBTree().getNewickTree().getVertex(x).getHostVertex();
+			if (x != excludeArc && (include ? (arcHost == hostArc) : (arcHost != hostArc))) {
 				if (emptyArcs == null || !emptyArcs.contains(x)) {
 					if (distance_bias.equals("exponential")) {
-						//System.out.println("Exponential");
 						double doubleValue = (Math.pow(10.0, (-1.0 * tree.getDistance(excludeArc, x, eventTime))));
 						if (Double.isInfinite(doubleValue)) {
 							doubleValue = Double.MAX_VALUE;
@@ -312,20 +321,13 @@ public class Epoch implements PublicCloneable {
 						value = BigDecimal.valueOf(doubleValue);
 					}
 					total = total.add(value);
-					phy_dist.put(total, x);
-					
-					//System.out.println("Distance: " + tree.getDistance(excludeArc, x, eventTime));
-					//System.out.println("Value: " + value);
-					//System.out.println("Total: " + total);
-					
+					phy_dist.put(total, x);					
 				}
 			}
-		}
-		
-		//System.out.println(phy_dist);
-		
+		}		
 		return phy_dist;
 	}
+	
 	
 	/**
 	 * Returns the epoch ID number.

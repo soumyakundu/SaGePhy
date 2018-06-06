@@ -3,6 +3,7 @@ package se.cbb.jprime.apps.genphylodata;
 import java.util.LinkedList;
 import se.cbb.jprime.io.NewickVertex;
 import se.cbb.jprime.topology.Epoch;
+import se.cbb.jprime.topology.RBTreeEpochDiscretiser;
 
 /**
  * Represents a guest tree vertex during the generative process.
@@ -22,6 +23,14 @@ public class GuestVertex extends NewickVertex {
 		REPLACING_LOSS,
 		ADDITIVE_TRANSFER,
 		REPLACING_TRANSFER,
+		ADDITIVE_TRANSFER_INTRAGENE_INTRASPECIES,
+		ADDITIVE_TRANSFER_INTRAGENE_INTERSPECIES,
+		ADDITIVE_TRANSFER_INTERGENE_INTRASPECIES,
+		ADDITIVE_TRANSFER_INTERGENE_INTERSPECIES,
+		REPLACING_TRANSFER_INTRAGENE_INTRASPECIES,
+		REPLACING_TRANSFER_INTRAGENE_INTERSPECIES,
+		REPLACING_TRANSFER_INTERGENE_INTRASPECIES,
+		REPLACING_TRANSFER_INTERGENE_INTERSPECIES,
 		HYBRID_DONATION,
 		HYBRID_DONATION_FROM_EXTINCT_DONOR,
 		ALLOPLOIDIC_HYBRID_RECEPTION,  // This is only one of the lineages of the polyploidisation.
@@ -51,11 +60,22 @@ public class GuestVertex extends NewickVertex {
 	/** Tranfered to arc */
 	int transferedToArc = -1;
 	
+	int transferedFromGuest = -1;
+	
+	int transferedToGuest = -1;
+	
 	/** Epoch. Not always applicable. */
-	Epoch epoch = null;
+	public Epoch epoch = null;
 	
 	/** Prunability status. */
 	Prunability prunability = Prunability.UNKNOWN;
+	
+	/** Guest tree. */
+	public RBTreeEpochDiscretiser guestTree;
+	
+	Integer guestTreeIndex;
+	
+	double branchtime;
 	
 	/**
 	 * Host arcs that the arc (where this vertex is head) passes by.
@@ -71,12 +91,17 @@ public class GuestVertex extends NewickVertex {
 	 * @param abstime absolute time of the this vertex.
 	 * @param branchtime arc time of this vertex.
 	 */
-	public GuestVertex(Event event, int sigma, Epoch epoch, double abstime, double branchtime) {
+	public GuestVertex(Event event, int sigma, Epoch epoch, double abstime, double branchtime, RBTreeEpochDiscretiser guestTree, Integer guestTreeIndex) {
 		super(-1, "", branchtime, "");
 		this.event = event;
 		this.sigma = sigma;
+		this.host_vertex = sigma;
 		this.epoch = epoch;
 		this.abstime = abstime;
+		this.guestTree = guestTree;
+		this.guestTreeIndex = guestTreeIndex;
+		this.guest_tree = guestTreeIndex;
+		this.branchtime = branchtime;
 	}
 	
 	/**
@@ -88,8 +113,13 @@ public class GuestVertex extends NewickVertex {
 		this.event = orig.event;
 		this.abstime = orig.abstime;
 		this.sigma = orig.sigma;
+		this.host_vertex = orig.sigma;
 		this.epoch = orig.epoch;
 		this.prunability = orig.prunability;
+		this.guestTree = orig.guestTree;
+		this.guestTreeIndex = orig.guestTreeIndex;
+		this.guest_tree = orig.guest_tree;
+		this.branchtime = orig.branchtime;
 	}
 	
 	public void setTransferedToArc(int x){
@@ -106,6 +136,22 @@ public class GuestVertex extends NewickVertex {
 	
 	public int getTransferedFromArc(){
 		return this.transferedFromArc;
+	}
+	
+	public void setTransferedToGuest(int x){
+		this.transferedToGuest = x;
+	}
+	
+	public int getTransferedToGuest(){
+		return this.transferedToGuest;
+	}
+	
+	public void setTransferedFromGuest(int x){
+		this.transferedFromGuest= x;
+	}
+	
+	public int getTransferedFromGuest(){
+		return this.transferedFromGuest;
 	}
 	
 	/**
@@ -146,6 +192,10 @@ public class GuestVertex extends NewickVertex {
 			StringBuilder sb = new StringBuilder(1024);
 			sb.append("[&&PRIME");
 			sb.append(" ID=").append(v.getNumber());
+			sb.append(" HOST=").append(v.getHostVertex());
+			if (v.getGuestTree() != null) {
+				sb.append(" GUEST=").append(v.getGuestTree());
+			}
 			switch (v.event) {
 			case DUPLICATION:
 				double [] disTimes= v.epoch.getTimes();
@@ -201,6 +251,126 @@ public class GuestVertex extends NewickVertex {
 				//String speciesEdge= "SPECIES_EDGE=("+ v.getTransferedFromArc() +","+ v.epoch.getNoOfArcs() +")";
 				//sb.append(" FROMTOLINEAGE="+ fromToArc2 +" "+ speciesEdge + " "+ discpt2);
 				sb.append(" FROMTOLINEAGE="+ fromToArc2 +" "+ discpt2);
+				break;
+			case ADDITIVE_TRANSFER_INTRAGENE_INTRASPECIES:
+				sb.append(" VERTEXTYPE=Additive Transfer Intragene Intraspecies");
+				String fromToArc1= "("+v.getTransferedFromArc()+","+ v.getTransferedToArc()+";"+v.getTransferedFromGuest()+","+v.getTransferedToGuest()+")";
+		
+				double [] discTimes1= v.epoch.getTimes();
+				int i1=0;
+				while (true && i1 < discTimes1.length){
+					if (discTimes1[i1] >= v.abstime){
+						break;
+					}	
+					++i1;
+				}
+				String discpt1= "DISCPT=(" + v.epoch.getNo() + "," + i1 +")";
+				sb.append(" FROMTOLINEAGE="+ fromToArc1 +" "+ discpt1);
+				break;
+			case ADDITIVE_TRANSFER_INTRAGENE_INTERSPECIES:
+				sb.append(" VERTEXTYPE=Additive Transfer Intragene Interspecies");
+				String fromToArc11= "("+v.getTransferedFromArc()+","+ v.getTransferedToArc()+";"+v.getTransferedFromGuest()+","+v.getTransferedToGuest()+")";
+		
+				double [] discTimes11= v.epoch.getTimes();
+				int i11=0;
+				while (true && i11 < discTimes11.length){
+					if (discTimes11[i11] >= v.abstime){
+						break;
+					}	
+					++i11;
+				}
+				String discpt11= "DISCPT=(" + v.epoch.getNo() + "," + i11 +")";
+				sb.append(" FROMTOLINEAGE="+ fromToArc11 +" "+ discpt11);
+				break;
+			case ADDITIVE_TRANSFER_INTERGENE_INTRASPECIES:
+				sb.append(" VERTEXTYPE=Additive Transfer Intergene Intraspecies");
+				String fromToArc111= "("+v.getTransferedFromArc()+","+ v.getTransferedToArc()+";"+v.getTransferedFromGuest()+","+v.getTransferedToGuest()+")";
+		
+				double [] discTimes111= v.epoch.getTimes();
+				int i111=0;
+				while (true && i111 < discTimes111.length){
+					if (discTimes111[i111] >= v.abstime){
+						break;
+					}	
+					++i111;
+				}
+				String discpt111= "DISCPT=(" + v.epoch.getNo() + "," + i111 +")";
+				sb.append(" FROMTOLINEAGE="+ fromToArc111 +" "+ discpt111);
+				break;
+			case ADDITIVE_TRANSFER_INTERGENE_INTERSPECIES:
+				sb.append(" VERTEXTYPE=Additive Transfer Intergene Interspecies");
+				String fromToArc1111= "("+v.getTransferedFromArc()+","+ v.getTransferedToArc()+";"+v.getTransferedFromGuest()+","+v.getTransferedToGuest()+")";
+		
+				double [] discTimes1111= v.epoch.getTimes();
+				int i1111=0;
+				while (true && i1111 < discTimes1111.length){
+					if (discTimes1111[i1111] >= v.abstime){
+						break;
+					}	
+					++i1111;
+				}
+				String discpt1111= "DISCPT=(" + v.epoch.getNo() + "," + i1111 +")";
+				sb.append(" FROMTOLINEAGE="+ fromToArc1111 +" "+ discpt1111);
+				break;
+			case REPLACING_TRANSFER_INTRAGENE_INTRASPECIES:
+				sb.append(" VERTEXTYPE=Replacing Transfer Intragene Intraspecies");
+				String fromToArc21= "("+v.getTransferedFromArc()+","+ v.getTransferedToArc()+";"+v.getTransferedFromGuest()+","+v.getTransferedToGuest()+")";
+		
+				double [] discTimes21= v.epoch.getTimes();
+				int r1=0;
+				while (true && r1 < discTimes21.length){
+					if (discTimes21[r1] >= v.abstime){
+						break;
+					}	
+					++r1;
+				}
+				String discpt21= "DISCPT=(" + v.epoch.getNo() + "," + r1 +")";
+				sb.append(" FROMTOLINEAGE="+ fromToArc21 +" "+ discpt21);
+				break;
+			case REPLACING_TRANSFER_INTRAGENE_INTERSPECIES:
+				sb.append(" VERTEXTYPE=Replacing Transfer Intragene Interspecies");
+				String fromToArc211= "("+v.getTransferedFromArc()+","+ v.getTransferedToArc()+";"+v.getTransferedFromGuest()+","+v.getTransferedToGuest()+")";
+		
+				double [] discTimes211= v.epoch.getTimes();
+				int r11=0;
+				while (true && r11 < discTimes211.length){
+					if (discTimes211[r11] >= v.abstime){
+						break;
+					}	
+					++r11;
+				}
+				String discpt211= "DISCPT=(" + v.epoch.getNo() + "," + r11 +")";
+				sb.append(" FROMTOLINEAGE="+ fromToArc211 +" "+ discpt211);
+				break;
+			case REPLACING_TRANSFER_INTERGENE_INTRASPECIES:
+				sb.append(" VERTEXTYPE=Replacing Transfer Intergene Intraspecies");
+				String fromToArc2111= "("+v.getTransferedFromArc()+","+ v.getTransferedToArc()+";"+v.getTransferedFromGuest()+","+v.getTransferedToGuest()+")";
+		
+				double [] discTimes2111= v.epoch.getTimes();
+				int r111=0;
+				while (true && r111 < discTimes2111.length){
+					if (discTimes2111[r111] >= v.abstime){
+						break;
+					}	
+					++r111;
+				}
+				String discpt2111= "DISCPT=(" + v.epoch.getNo() + "," + r111 +")";
+				sb.append(" FROMTOLINEAGE="+ fromToArc2111 +" "+ discpt2111);
+				break;
+			case REPLACING_TRANSFER_INTERGENE_INTERSPECIES:
+				sb.append(" VERTEXTYPE=Replacing Transfer Intergene Interspecies");
+				String fromToArc21111= "("+v.getTransferedFromArc()+","+ v.getTransferedToArc()+";"+v.getTransferedFromGuest()+","+v.getTransferedToGuest()+")";
+		
+				double [] discTimes21111= v.epoch.getTimes();
+				int r1111=0;
+				while (true && r1111 < discTimes21111.length){
+					if (discTimes21111[r1111] >= v.abstime){
+						break;
+					}	
+					++r1111;
+				}
+				String discpt21111= "DISCPT=(" + v.epoch.getNo() + "," + r1111 +")";
+				sb.append(" FROMTOLINEAGE="+ fromToArc21111 +" "+ discpt21111);
 				break;
 			case SPECIATION:
 				double [] disctTimes= v.epoch.getTimes();

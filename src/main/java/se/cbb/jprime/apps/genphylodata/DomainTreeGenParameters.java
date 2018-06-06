@@ -25,10 +25,10 @@ import com.beust.jcommander.Parameter;
  *
  * @author Joel Sjöstrand.
  */
-public class GuestTreeGenParameters {
+public class DomainTreeGenParameters {
 
 	/** Required parameters: S, lambda, mu, tau, outfile. */
-	@Parameter(description = "<host tree file or string> <dup rate> <loss rate> <trans rate> <out prefix>")
+	@Parameter(description = "<-n no. of guest trees if more than 1> <host tree file or string> <guest tree file(s) or string(s)> <dup rate> <loss rate> <trans rate> <out prefix>")
 	public List<String> args = new ArrayList<String>();
 
 	/** Citation info */
@@ -48,7 +48,7 @@ public class GuestTreeGenParameters {
 	public String seed = null;
 
 	/** Number of trees to generate. */
-	@Parameter(names = {"-n", "--no-of-guest-trees"}, description = "Number of guest trees to generate.")
+	@Parameter(names = {"-n", "--no-of-guest-trees"}, description = "Number of input guest trees. Required if more than 1.")
 	public Integer no = 1;
 
 	/** Min leaves. */
@@ -94,7 +94,7 @@ public class GuestTreeGenParameters {
 
 	/** Vertex prefix. */
 	@Parameter(names = {"-vp", "--vertex-prefix"}, description = "Vertex prefix.")
-	public String vertexPrefix = "G";
+	public String vertexPrefix = "D";
 
 	/** Sigma. */
 	@Parameter(names = {"-vph", "--vertex-prefix-host-map"}, description = "Append host vertex/edge belonging to vertex prefix.")
@@ -107,26 +107,32 @@ public class GuestTreeGenParameters {
 
 	/** Rate of replacing transfers. */
 	@Parameter(names = {"-rt", "--replacing-transfers"}, description = "Probability of replacing horizontal gene transfers.")
-	public String replacing_transfers = "0.5";
+	public String replacing_transfers = "0.0";
 
 	/** Type of distance bias for transfers. */
 	@Parameter(names = {"-db", "--distance-bias"}, description = "Type of distance-bias for horizontal gene transfers. Options: none, simple, exponential.")
-	public String distance_bias = "simple";
+	public String distance_bias = "none";
 	
-	/** Coefficient for sampling gene tree birth location. */
-	@Parameter(names = {"-gbc", "--gene-birth-coefficient"}, description = "Set level of bias towards root of species tree for gene tree birth location")
-	public String gene_birth = "1.0";
+	/** Coefficient for sampling domain tree birth location. */
+	@Parameter(names = {"-dbc", "--domain-birth-coefficient"}, description = "Set level of bias towards root of gene tree for domain tree birth location")
+	public String domain_birth = "1.0";
 	
-	@Parameter(names = {"-gb", "--gene-birth-sampling"}, description = "Randomly sample location of gene birth on species tree")
-	public Boolean doGeneBirth = false;
-
+	@Parameter(names = {"-dbs", "--domain-birth-sampling"}, description = "Randomly sample location of domain birth on gene tree")
+	public Boolean doDomainBirth = false;
+	
+	@Parameter(names = {"-ig", "--inter-gene-transfers"}, description = "Probability of transfers across gene trees.")
+	public String inter_gene = "0.0";
+	
+	@Parameter(names = {"-is", "--inter-species-transfers"}, description = "Probability of transfers across species.")
+	public String inter_species = "0.0";
+	
 	/**
 	 * Returns output and info streams.
 	 * @return streams.
 	 */
 	public BufferedWriter getOutputFile(String suffix) {
 		try {
-			String outprefix = args.get(4).trim();
+			String outprefix = args.get(4 + this.no).trim();
 			return new BufferedWriter(new FileWriter(outprefix + suffix));
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Invalid output file prefix.", e);
@@ -141,19 +147,28 @@ public class GuestTreeGenParameters {
 		} else {
 			host = PrIMENewickTreeReader.readTree(args.get(0), false, true);
 		}
-		return new GuestTreeInHostTreeCreator(host, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getReplacingTransferRate(), this.distance_bias, this.doGeneBirth, this.getGeneBirthSampling(), false, this.getLeafSamplingProb(), this.getStem());
+		ArrayList<PrIMENewickTree> guests = new ArrayList<PrIMENewickTree>();
+		for (int i = 1; i <= this.no; i++) {
+			File j = new File(this.args.get(i));
+			if (j.exists()) {
+				guests.add(PrIMENewickTreeReader.readTree(j, false, true));
+			} else {
+				guests.add(PrIMENewickTreeReader.readTree(args.get(i), false, true));
+			}
+		}
+		return new DomainTreeInHostTreeCreator(host, guests, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getReplacingTransferRate(), this.distance_bias, this.doDomainBirth, this.getDomainBirthSampling(), false, this.getInterGeneTransfers(), this.getInterSpeciesTransfers(), this.getLeafSamplingProb(), this.getStem());
 	}
 
 	public double getDuplicationRate() {
-		return Double.parseDouble(this.args.get(1));
+		return Double.parseDouble(this.args.get(this.no + 1));
 	}
 
 	public double getLossRate() {
-		return Double.parseDouble(this.args.get(2));
+		return Double.parseDouble(this.args.get(this.no + 2));
 	}
 
 	public double getTransferRate() {
-		return Double.parseDouble(this.args.get(3));
+		return Double.parseDouble(this.args.get(this.no + 3));
 	}
 
 	public ArrayList<Integer> getLeafSizes() throws FileNotFoundException {
@@ -180,10 +195,18 @@ public class GuestTreeGenParameters {
 		return Double.parseDouble(this.replacing_transfers);
 	}
 	
-	public Double getGeneBirthSampling() {
-		return Double.parseDouble(this.gene_birth);
+	public Double getDomainBirthSampling() {
+		return Double.parseDouble(this.domain_birth);
 	}
-
+	
+	public Double getInterGeneTransfers() {
+		return Double.parseDouble(this.inter_gene);
+	}
+	
+	public Double getInterSpeciesTransfers() {
+		return Double.parseDouble(this.inter_species);
+	}
+	
 	public GuestTreeInHybridGraphCreator getHostHybridGraphCreator() throws GMLIOException, IOException {
 		String str = this.args.get(0);
 		File f = new File(str);
