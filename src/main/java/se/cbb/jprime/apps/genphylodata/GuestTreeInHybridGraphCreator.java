@@ -133,9 +133,9 @@ public class GuestTreeInHybridGraphCreator implements UnprunedGuestTreeCreator {
 				GuestVertex p;
 				// We now either have alloploidic or autoploidic hybridisation.
 				if (hostGraph.getVertexType(hyb) == VertexType.ALLOPOLYPLOIDIC_HYBRID) {
-					p = new GuestVertex(Event.ALLOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null);
+					p = new GuestVertex(Event.ALLOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null, null);
 				} else if (hostGraph.getVertexType(hyb) == VertexType.AUTOPOLYPLOIDIC_HYBRID) {
-					p = new GuestVertex(Event.AUTOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null);
+					p = new GuestVertex(Event.AUTOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null, null);
 				} else {
 					throw new UnsupportedOperationException("Unexpected guest vertex type.");
 				}
@@ -152,9 +152,9 @@ public class GuestTreeInHybridGraphCreator implements UnprunedGuestTreeCreator {
 				GuestVertex p;
 				// We now either have alloploidic or autoploidic hybridisation.
 				if (hostGraph.getVertexType(hyb) == VertexType.ALLOPOLYPLOIDIC_HYBRID) {
-					p = new GuestVertex(Event.ALLOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null);
+					p = new GuestVertex(Event.ALLOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null, null);
 				} else if (hostGraph.getVertexType(hyb) == VertexType.AUTOPOLYPLOIDIC_HYBRID) {
-					p = new GuestVertex(Event.AUTOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null);
+					p = new GuestVertex(Event.AUTOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null, null);
 				} else {
 					throw new UnsupportedOperationException("Unexpected guest vertex type.");
 				}
@@ -257,7 +257,7 @@ public class GuestTreeInHybridGraphCreator implements UnprunedGuestTreeCreator {
 						GuestVertex.Event.DUPLICATION : GuestVertex.Event.LOSS;
 			}
 		}
-		return new GuestVertex(event, X, null, eventTime, branchTime, null);
+		return new GuestVertex(event, X, null, eventTime, branchTime, null, null);
 	}
 
 

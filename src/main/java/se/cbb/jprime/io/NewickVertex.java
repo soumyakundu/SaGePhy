@@ -37,6 +37,8 @@ public class NewickVertex {
 	
 	protected Integer host_vertex;
 	
+	protected Integer guest_tree;
+		
 	/**
 	 * Constructor. Creates an empty vertex.
 	 */
@@ -103,6 +105,14 @@ public class NewickVertex {
 	
 	public void setHostVertex(int host_vertex) {
 		this.host_vertex = host_vertex;
+	}
+	
+	public Integer getGuestTree() {
+		return this.guest_tree;
+	}
+	
+	public void setGuestTree(int guest_vertex) {
+		this.guest_tree = guest_vertex;
 	}
 	
 	/**

@@ -136,7 +136,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		//root = this.createGuestVertex(myRoot, hostTree.getVertexUpperTime(myRoot), prng);
 		//System.out.println(hostTree.getVertexUpperTime(myRoot));
 		//System.out.println(hostTree.getTipToLeafTime());
-		System.out.println(myRoot);
+		//System.out.println(myRoot);
 		alive.add(root);
 
 		// Recursively process lineages.
@@ -177,7 +177,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 					lin.setTransferedFromArc(lin.sigma);
 					rc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
-					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
+					lin.setTransferedToArc(lin.epoch.getTransferedToArc());
 
 					//System.out.println("Additive Transfer to: " + transferedToArc);
 
@@ -186,7 +186,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 					lin.setTransferedFromArc(lin.sigma);
 					lc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
-					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
+					lin.setTransferedToArc(lin.epoch.getTransferedToArc());
 
 					//System.out.println("Additive Transfer to: " + transferedToArc);
 				}
@@ -196,7 +196,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					lc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
 					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 					lin.setTransferedFromArc(lin.sigma);
-					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
+					lin.setTransferedToArc(lin.epoch.getTransferedToArc());
 
 					GuestVertex node = findVertex(root, lin);
 					ArrayList<Integer> emptyArcs = new ArrayList<Integer>();
@@ -231,14 +231,16 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					} else {
 						lin.event = Event.ADDITIVE_TRANSFER;
 						rc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
-						System.out.println("Could not replace from: " + lin.sigma + " at " + lin.abstime);
+						lin.setTransferedToArc(transferedToArc);
+						lin.epoch.setTransferedToArc(transferedToArc);
+						//System.out.println("Could not replace from: " + lin.sigma + " at " + lin.abstime);
 					}
 
 				} else {
 					rc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
 					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 					lin.setTransferedFromArc(lin.sigma);
-					lin.setTransferedToArc(lin.epoch.getTranferedToArc());
+					lin.setTransferedToArc(lin.epoch.getTransferedToArc());
 
 					GuestVertex node = findVertex(root, lin);
 					ArrayList<Integer> emptyArcs = new ArrayList<Integer>();
@@ -273,7 +275,9 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					} else {
 						lin.event = Event.ADDITIVE_TRANSFER;
 						lc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
-						System.out.println("Could not replace from: " + lin.sigma + " at " + lin.abstime);
+						lin.setTransferedToArc(transferedToArc);
+						lin.epoch.setTransferedToArc(transferedToArc);
+						//System.out.println("Could not replace from: " + lin.sigma + " at " + lin.abstime);
 					}
 				}
 
@@ -418,7 +422,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			}
 			epoch = this.hostTree.getEpoch(epno);
 		}
-		return new GuestVertex(event, X, epoch, eventTime, branchTime, this.hostTree);
+		return new GuestVertex(event, X, epoch, eventTime, branchTime, this.hostTree, null);
 	}
 
 	@Override

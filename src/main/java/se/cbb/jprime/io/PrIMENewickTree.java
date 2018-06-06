@@ -57,6 +57,7 @@ public class PrIMENewickTree extends NewickTree {
 		TREE_TOP_TIME           ("TT=\"?([0-9\\+\\-\\.eE]+)\"?"),
 		VERTEX_NUMBERS          ("ID=\"?([0-9]+)\"?"),
 		VERTEX_HOST				("HOST=\"?([0-9]+)\"?"),
+		VERTEX_GUEST			("GUEST=\"?([0-9]+)\"?"),
 		VERTEX_NAMES            ("NAME=\"?(\\w+)\"?"),
 		BRANCH_LENGTHS          ("BL=\"?([0-9\\+\\-\\.eE]+)\"?"),
 		ORIGINAL_BRANCH_LENGTHS ("ORIGBL=\"?([0-9\\+\\-\\.eE]+)\"?"),
@@ -224,6 +225,8 @@ public class PrIMENewickTree extends NewickTree {
 		case VERTEX_NUMBERS:
 			return true;
 		case VERTEX_HOST:
+			return true;
+		case VERTEX_GUEST:
 			return true;
 		case VERTEX_NAMES:
 			return this.hasVertexNames;

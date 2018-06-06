@@ -49,7 +49,7 @@ public class Epoch implements PublicCloneable {
 	/** Timestep between discretised times. Stored explicitly for speed. */
 	private double m_timestep;
 	
-	/** Random Arc selected fro transfer*/
+	/** Random Arc selected for transfer*/
 	private int transferedToArc = -1;
 	
 	/**
@@ -216,11 +216,11 @@ public class Epoch implements PublicCloneable {
 		return this.m_arcs[prng.nextInt(this.m_arcs.length)];
 	}
 	
-	public int getTranferedToArc(){
+	public int getTransferedToArc(){
 		return this.transferedToArc;
 	}
 	
-	public void setTranferedToArc(int arc){
+	public void setTransferedToArc(int arc){
 		this.transferedToArc= arc;
 	}
 	
@@ -254,7 +254,7 @@ public class Epoch implements PublicCloneable {
 		if (!distance_bias.equals("none")) {
 			NavigableMap<BigDecimal, Integer> dist = setDistance(excludeArc, eventTime, distance_bias, emptyArcs, hostArc, include);
 			if (dist.size() < 1) {
-				return -1;
+				return -5;
 			} else {
 				BigDecimal total = dist.lastKey();			
 				BigDecimal rand;
@@ -272,7 +272,7 @@ public class Epoch implements PublicCloneable {
 				}
 			}
 			if (same_host.size() < 1) {
-				return -1;
+				return -5;
 			} else {
 				int to = prng.nextInt(same_host.size());
 				arc = same_host.get(to);
@@ -291,7 +291,7 @@ public class Epoch implements PublicCloneable {
 				}
 			}
 		}
-		this.setTranferedToArc(arc);
+		this.setTransferedToArc(arc);
 		return arc;
 	}
 	

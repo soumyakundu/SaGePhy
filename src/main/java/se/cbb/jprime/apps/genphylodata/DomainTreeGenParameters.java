@@ -28,7 +28,7 @@ import com.beust.jcommander.Parameter;
 public class DomainTreeGenParameters {
 
 	/** Required parameters: S, lambda, mu, tau, outfile. */
-	@Parameter(description = "<host tree file or string> <guest tree file(s) or string(s)> <dup rate> <loss rate> <trans rate> <out prefix>")
+	@Parameter(description = "<-n no. of guest trees if more than 1> <host tree file or string> <guest tree file(s) or string(s)> <dup rate> <loss rate> <trans rate> <out prefix>")
 	public List<String> args = new ArrayList<String>();
 
 	/** Citation info */
@@ -48,7 +48,7 @@ public class DomainTreeGenParameters {
 	public String seed = null;
 
 	/** Number of trees to generate. */
-	@Parameter(names = {"-n", "--no-of-guest-trees"}, description = "Number of input guest trees.")
+	@Parameter(names = {"-n", "--no-of-guest-trees"}, description = "Number of input guest trees. Required if more than 1.")
 	public Integer no = 1;
 
 	/** Min leaves. */
@@ -94,7 +94,7 @@ public class DomainTreeGenParameters {
 
 	/** Vertex prefix. */
 	@Parameter(names = {"-vp", "--vertex-prefix"}, description = "Vertex prefix.")
-	public String vertexPrefix = "G";
+	public String vertexPrefix = "D";
 
 	/** Sigma. */
 	@Parameter(names = {"-vph", "--vertex-prefix-host-map"}, description = "Append host vertex/edge belonging to vertex prefix.")

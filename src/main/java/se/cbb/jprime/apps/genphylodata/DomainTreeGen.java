@@ -46,6 +46,7 @@ public class DomainTreeGen implements JPrIMEApp {
 			int noargs = params.doQuiet ? (params.no + 4) : (params.no + 5);
 			if (args.length == 0 || params.help || params.args.size() != noargs) {
 				StringBuilder sb = new StringBuilder(65536);
+				/**
 				sb.append(
 						"================================================================================\n" +
 						"GuestTreeGen is part of the JPrIME-GenPhyloData suite of tools for creating\n" +
@@ -64,8 +65,9 @@ public class DomainTreeGen implements JPrIMEApp {
 						"Releases, tutorial, etc: https://github.com/arvestad/jprime/wiki/" +
 						"License: JPrIME is available under the New BSD License.\n" +
 						"================================================================================\n");
+				*/
 				sb.append("Usage:\n" +
-						"    java -jar jprime-X.Y.Z.jar GuestTreeGen [options] <host tree> <dup rate> <loss rate> <trans rate> <out prefix>\n");
+						"    java -jar jprime-X.Y.Z.jar DomainTreeGen [options] <host tree file or string> <guest tree file(s) or string(s)> <dup rate> <loss rate> <trans rate> <out prefix>\n");
 				JCommanderUsageWrapper.getUnsortedUsage(jc, params, sb);
 				System.out.println(sb.toString());
 				return;
@@ -111,13 +113,13 @@ public class DomainTreeGen implements JPrIMEApp {
 				}
 				out.close();
 				out = params.getOutputFile(".unpruned.info");
-				out.write("# GUESTTREEGEN\n");
+				out.write("# DOMAINTREEGEN\n");
 				out.write("Arguments:\t" +  Arrays.toString(args) + '\n');
 				out.write("Attempts:\t" + machina.getAttempts() + '\n');
 				out.write(motor.getInfo((GuestVertex) guestTree.second.getRoot(), true));
 				out.close();
 				out = params.getOutputFile(".pruned.info");
-				out.write("# GUESTTREEGEN\n");
+				out.write("# DOMAINTREEGEN\n");
 				out.write("Arguments:\t" +  Arrays.toString(args) + '\n');
 				out.write("Attempts:\t" + machina.getAttempts() + '\n');
 				out.write(motor.getInfo((GuestVertex) guestTree.first.getRoot(), true));
