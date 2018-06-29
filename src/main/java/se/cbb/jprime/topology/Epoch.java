@@ -246,13 +246,13 @@ public class Epoch implements PublicCloneable {
 	 * @param excludeArc arc to exclude.
 	 * @throws NewickIOException 
 	 */
-	public int sampleArc(PRNG prng, int excludeArc, int fromArc, double eventTime, String distance_bias, ArrayList<Integer> emptyArcs, int hostArc, Boolean include) throws NewickIOException {
+	public int sampleArc(PRNG prng, int excludeArc, int fromArc, double eventTime, String distance_bias, double distance_bias_rate, ArrayList<Integer> emptyArcs, int hostArc, Boolean include) throws NewickIOException {
 		int arc;
 		if (this.m_arcs.length == 1 && excludeArc == m_arcs[0]) {
 			throw new IllegalArgumentException("Cannot exclude arc from sampling (it's the only one!): " + excludeArc);
 		}
 		if (!distance_bias.equals("none")) {
-			NavigableMap<BigDecimal, Integer> dist = setDistance(excludeArc, eventTime, distance_bias, emptyArcs, hostArc, include);
+			NavigableMap<BigDecimal, Integer> dist = setDistance(excludeArc, eventTime, distance_bias, distance_bias_rate, emptyArcs, hostArc, include);
 			if (dist.size() < 1) {
 				return -5;
 			} else {
@@ -298,7 +298,7 @@ public class Epoch implements PublicCloneable {
 	/** Returns HashMap of phylogenetic distances to all lineages in the epoch eligible to receive transfers from given recipient. 
 	 * @throws NewickIOException */	
 	
-	public NavigableMap<BigDecimal, Integer> setDistance(int excludeArc, double eventTime, String distance_bias, ArrayList<Integer> emptyArcs, int hostArc, Boolean include) throws NewickIOException {
+	public NavigableMap<BigDecimal, Integer> setDistance(int excludeArc, double eventTime, String distance_bias, double distance_bias_rate, ArrayList<Integer> emptyArcs, int hostArc, Boolean include) throws NewickIOException {
 		BigDecimal total = new BigDecimal(0);
 		BigDecimal value;
 		NavigableMap<BigDecimal, Integer> phy_dist = new TreeMap<BigDecimal, Integer>();
@@ -307,7 +307,7 @@ public class Epoch implements PublicCloneable {
 			if (x != excludeArc && (include ? (arcHost == hostArc) : (arcHost != hostArc))) {
 				if (emptyArcs == null || !emptyArcs.contains(x)) {
 					if (distance_bias.equals("exponential")) {
-						double doubleValue = (Math.pow(10.0, (-1.0 * tree.getDistance(excludeArc, x, eventTime))));
+						double doubleValue = (distance_bias_rate * Math.pow(Math.E, (-distance_bias_rate * tree.getDistance(excludeArc, x, eventTime))));
 						if (Double.isInfinite(doubleValue)) {
 							doubleValue = Double.MAX_VALUE;
 						}

@@ -41,7 +41,7 @@ public class ParameterParser {
                         if(trim)
 			hostree = hostree.substring(13);
 			
-			PrIMENewickTree sRaw = PrIMENewickTreeReader.readTree(hostree, false, true);
+			PrIMENewickTree sRaw = PrIMENewickTreeReader.readTree(hostree, false, true, null);
 			RBTree s = new RBTree(sRaw, "HostTree");
 			NamesMap sNames = sRaw.getVertexNamesMap(true, "HostTreeNames");
 			TimesMap sTimes = sRaw.getTimesMap("HostTreeRawTimes");

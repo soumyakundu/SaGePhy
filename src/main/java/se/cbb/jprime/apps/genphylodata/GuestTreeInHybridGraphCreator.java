@@ -1,5 +1,6 @@
 package se.cbb.jprime.apps.genphylodata;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import se.cbb.jprime.apps.genphylodata.GuestVertex.Event;
@@ -8,6 +9,7 @@ import se.cbb.jprime.math.ExponentialDistribution;
 import se.cbb.jprime.math.NumberManipulation;
 import se.cbb.jprime.math.PRNG;
 import se.cbb.jprime.topology.HybridGraph;
+import se.cbb.jprime.topology.RBTreeEpochDiscretiser;
 import se.cbb.jprime.topology.HybridGraph.VertexType;
 
 /**
@@ -133,9 +135,9 @@ public class GuestTreeInHybridGraphCreator implements UnprunedGuestTreeCreator {
 				GuestVertex p;
 				// We now either have alloploidic or autoploidic hybridisation.
 				if (hostGraph.getVertexType(hyb) == VertexType.ALLOPOLYPLOIDIC_HYBRID) {
-					p = new GuestVertex(Event.ALLOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null, null);
+					p = new GuestVertex(Event.ALLOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null);
 				} else if (hostGraph.getVertexType(hyb) == VertexType.AUTOPOLYPLOIDIC_HYBRID) {
-					p = new GuestVertex(Event.AUTOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null, null);
+					p = new GuestVertex(Event.AUTOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null);
 				} else {
 					throw new UnsupportedOperationException("Unexpected guest vertex type.");
 				}
@@ -152,9 +154,9 @@ public class GuestTreeInHybridGraphCreator implements UnprunedGuestTreeCreator {
 				GuestVertex p;
 				// We now either have alloploidic or autoploidic hybridisation.
 				if (hostGraph.getVertexType(hyb) == VertexType.ALLOPOLYPLOIDIC_HYBRID) {
-					p = new GuestVertex(Event.ALLOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null, null);
+					p = new GuestVertex(Event.ALLOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null);
 				} else if (hostGraph.getVertexType(hyb) == VertexType.AUTOPOLYPLOIDIC_HYBRID) {
-					p = new GuestVertex(Event.AUTOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null, null);
+					p = new GuestVertex(Event.AUTOPLOIDIC_HYBRID_RECEPTION, hyb, null, tdon, tdon - thyb, null);
 				} else {
 					throw new UnsupportedOperationException("Unexpected guest vertex type.");
 				}
@@ -257,7 +259,7 @@ public class GuestTreeInHybridGraphCreator implements UnprunedGuestTreeCreator {
 						GuestVertex.Event.DUPLICATION : GuestVertex.Event.LOSS;
 			}
 		}
-		return new GuestVertex(event, X, null, eventTime, branchTime, null, null);
+		return new GuestVertex(event, X, null, eventTime, branchTime, null);
 	}
 
 
@@ -394,5 +396,10 @@ public class GuestTreeInHybridGraphCreator implements UnprunedGuestTreeCreator {
 	@Override
 	public String getHost() {
 		return this.hostGraph.toString();
+	}
+	
+	@Override
+	public HashMap<RBTreeEpochDiscretiser, Integer> getUsed() {
+		return null;
 	}
 }

@@ -547,6 +547,10 @@ public class PrIMENewickTree extends NewickTree {
 		return this.treeName;
 	}
 	
+	public void setTreeName(String x) {
+		this.treeName = x;
+	}
+	
 	/**
 	 * Return the "top time", i.e. typically an explicitly stored
 	 * branch length or arc time preceding the root. Is null if empty.

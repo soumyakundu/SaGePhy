@@ -20,15 +20,16 @@ import se.cbb.jprime.topology.TopologyException;
 
 import com.beust.jcommander.Parameter;
 
+
 /**
  * Contains user settings.
  *
- * @author Joel Sjöstrand.
+ * @author Soumya Kundu.
  */
 public class DomainTreeGenParameters {
-
-	/** Required parameters: S, lambda, mu, tau, outfile. */
-	@Parameter(description = "<-n no. of guest trees if more than 1> <host tree file or string> <guest tree file(s) or string(s)> <dup rate> <loss rate> <trans rate> <out prefix>")
+	
+	/** Required parameters. */
+	@Parameter(description = "<host tree file or string> <guest tree directory> <dup rate> <loss rate> <trans rate> <out prefix>")
 	public List<String> args = new ArrayList<String>();
 
 	/** Citation info */
@@ -46,10 +47,6 @@ public class DomainTreeGenParameters {
 	/** PRNG seed. */
 	@Parameter(names = {"-s", "--seed"}, description = "PRNG seed. Default: Random seed.")
 	public String seed = null;
-
-	/** Number of trees to generate. */
-	@Parameter(names = {"-n", "--no-of-guest-trees"}, description = "Number of input guest trees. Required if more than 1.")
-	public Integer no = 1;
 
 	/** Min leaves. */
 	@Parameter(names = {"-min", "--min-leaves"}, description = "Minimum number of extant guest leaves required.")
@@ -107,24 +104,31 @@ public class DomainTreeGenParameters {
 
 	/** Rate of replacing transfers. */
 	@Parameter(names = {"-rt", "--replacing-transfers"}, description = "Probability of replacing horizontal gene transfers.")
-	public String replacing_transfers = "0.0";
+	public String replacing_transfers = "0.5";
 
 	/** Type of distance bias for transfers. */
 	@Parameter(names = {"-db", "--distance-bias"}, description = "Type of distance-bias for horizontal gene transfers. Options: none, simple, exponential.")
 	public String distance_bias = "none";
 	
-	/** Coefficient for sampling domain tree birth location. */
-	@Parameter(names = {"-dbc", "--domain-birth-coefficient"}, description = "Set level of bias towards root of gene tree for domain tree birth location")
-	public String domain_birth = "1.0";
+	/** Coefficient for transfer distance-bias. */
+	@Parameter(names = {"-dbr", "--distance-bias-rate"}, description = "Set level of bias towards recipients that are phylogenetically closer.")
+	public String distance_bias_rate = "1.0";
 	
-	@Parameter(names = {"-dbs", "--domain-birth-sampling"}, description = "Randomly sample location of domain birth on gene tree")
+	@Parameter(names = {"-dbs", "--domain-birth-sampling"}, description = "Randomly sample location of domain birth on gene tree.")
 	public Boolean doDomainBirth = false;
 	
+	/** Coefficient for sampling domain tree birth location. */
+	@Parameter(names = {"-dbc", "--domain-birth-coefficient"}, description = "Set level of bias towards root of gene tree for domain tree birth location.")
+	public String domain_birth = "1.0";
+	
 	@Parameter(names = {"-ig", "--inter-gene-transfers"}, description = "Probability of transfers across gene trees.")
-	public String inter_gene = "0.0";
+	public String inter_gene = "0.5";
 	
 	@Parameter(names = {"-is", "--inter-species-transfers"}, description = "Probability of transfers across species.")
-	public String inter_species = "0.0";
+	public String inter_species = "0.5";
+	
+	@Parameter(names = {"-all", "--all-gene-trees"}, description = "Enforce the evolution of the domain tree in all gene trees.")
+	public Boolean all_genes = false;
 	
 	/**
 	 * Returns output and info streams.
@@ -132,7 +136,7 @@ public class DomainTreeGenParameters {
 	 */
 	public BufferedWriter getOutputFile(String suffix) {
 		try {
-			String outprefix = args.get(4 + this.no).trim();
+			String outprefix = args.get(5).trim();
 			return new BufferedWriter(new FileWriter(outprefix + suffix));
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Invalid output file prefix.", e);
@@ -145,30 +149,27 @@ public class DomainTreeGenParameters {
 		if (f.exists()) {
 			host = PrIMENewickTreeReader.readTree(f, false, true);
 		} else {
-			host = PrIMENewickTreeReader.readTree(args.get(0), false, true);
+			host = PrIMENewickTreeReader.readTree(args.get(0), false, true, null);
 		}
 		ArrayList<PrIMENewickTree> guests = new ArrayList<PrIMENewickTree>();
-		for (int i = 1; i <= this.no; i++) {
-			File j = new File(this.args.get(i));
-			if (j.exists()) {
-				guests.add(PrIMENewickTreeReader.readTree(j, false, true));
-			} else {
-				guests.add(PrIMENewickTreeReader.readTree(args.get(i), false, true));
-			}
+		File dir = new File(this.args.get(1));
+		File[] genes = dir.listFiles();	
+		for (File j : genes) {
+			guests.add(PrIMENewickTreeReader.readTree(j, false, true));
 		}
-		return new DomainTreeInHostTreeCreator(host, guests, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getReplacingTransferRate(), this.distance_bias, this.doDomainBirth, this.getDomainBirthSampling(), false, this.getInterGeneTransfers(), this.getInterSpeciesTransfers(), this.getLeafSamplingProb(), this.getStem());
+		return new DomainTreeInHostTreeCreator(host, guests, this.getDuplicationRate(), this.getLossRate(), this.getTransferRate(), this.getReplacingTransferRate(), this.distance_bias, this.getDistanceBiasRate(), this.doDomainBirth, this.getDomainBirthSampling(), false, this.getInterGeneTransfers(), this.getInterSpeciesTransfers(), this.getLeafSamplingProb(), this.getStem());
 	}
 
 	public double getDuplicationRate() {
-		return Double.parseDouble(this.args.get(this.no + 1));
+		return Double.parseDouble(this.args.get(2));
 	}
 
 	public double getLossRate() {
-		return Double.parseDouble(this.args.get(this.no + 2));
+		return Double.parseDouble(this.args.get(3));
 	}
 
 	public double getTransferRate() {
-		return Double.parseDouble(this.args.get(this.no + 3));
+		return Double.parseDouble(this.args.get(4));
 	}
 
 	public ArrayList<Integer> getLeafSizes() throws FileNotFoundException {
@@ -193,6 +194,10 @@ public class DomainTreeGenParameters {
 
 	public Double getReplacingTransferRate() {
 		return Double.parseDouble(this.replacing_transfers);
+	}
+	
+	public Double getDistanceBiasRate() {
+		return Double.parseDouble(this.distance_bias_rate);
 	}
 	
 	public Double getDomainBirthSampling() {

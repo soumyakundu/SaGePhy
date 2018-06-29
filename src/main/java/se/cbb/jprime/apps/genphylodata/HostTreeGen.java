@@ -78,19 +78,19 @@ public class HostTreeGen implements JPrIMEApp {
 			} else {
 				S = "H0:" + T + ";";
 			}
-			PrIMENewickTree host = PrIMENewickTreeReader.readTree(S, false, true);
+			PrIMENewickTree host = PrIMENewickTreeReader.readTree(S, false, true, null);
 
 			// Machine.
 			int minper = (params.bifurcationStart ? 1 : 0);
 			GuestTreeMachina machine = new GuestTreeMachina(params.seed, params.min, params.max, minper, Integer.MAX_VALUE, params.getLeafSizes(), params.maxAttempts,
-						params.vertexPrefix, params.excludeMeta, false);
+						params.vertexPrefix, params.excludeMeta, false, true);
 
 			// Primus motor.
-			GuestTreeInHostTreeCreator motor = new GuestTreeInHostTreeCreator(host, params.getBirthRate(), params.getDeathRate(), 0.0, 0.0, "", false, 0.0, true, params.getLeafSamplingProb(), null);
+			GuestTreeInHostTreeCreator motor = new GuestTreeInHostTreeCreator(host, params.getBirthRate(), params.getDeathRate(), 0.0, 0.0, "", 1.0, false, 0.0, true, params.getLeafSamplingProb(), null);
 
 			Pair<PrIMENewickTree, PrIMENewickTree> guestTree = null;
 			try {
-				guestTree = machine.sampleGuestTree(motor);
+				guestTree = machine.sampleGuestTree(motor, null);
 			} catch (MaxAttemptsException ex) {
 				if (!params.doQuiet) {
 					BufferedWriter outinfo = params.getOutputFile(".info");

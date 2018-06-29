@@ -61,7 +61,7 @@ public class SampRealFromPosterior implements JPrIMEApp {
 		boolean FLAG=false;
 		do{
 		try {
-			PrIMENewickTree pg= PrIMENewickTreeReader.readTree(geneTreeString, true, false);
+			PrIMENewickTree pg= PrIMENewickTreeReader.readTree(geneTreeString, true, false, null);
 			NewickTree newickGTree= NewickTreeReader.readTree(geneTreeString, true);
 			g= new RBTree(newickGTree, "sahi da") ;
 			gNames= newickGTree.getVertexNamesMap(true, "haji bass ka");

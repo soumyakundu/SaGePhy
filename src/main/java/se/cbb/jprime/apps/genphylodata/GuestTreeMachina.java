@@ -12,6 +12,7 @@ import se.cbb.jprime.io.NewickVertex;
 import se.cbb.jprime.io.PrIMENewickTree;
 import se.cbb.jprime.math.PRNG;
 import se.cbb.jprime.misc.Pair;
+import se.cbb.jprime.topology.RBTreeEpochDiscretiser;
 import se.cbb.jprime.topology.TopologyException;
 
 /**
@@ -33,6 +34,7 @@ public class GuestTreeMachina {
 	private boolean excludeMeta;
 	private int attempts;
 	private boolean appendSigma;
+	private boolean isSpecies;
 	
 	/**
 	 * Constructor.
@@ -47,7 +49,7 @@ public class GuestTreeMachina {
 	 * @param excludeMeta true to exclude meta info.
 	 * @param appendSigma appends the sigma to the name.
 	 */
-	protected GuestTreeMachina(String seed, int min, int max, int minper, int maxper, List<Integer> leafSizes, int maxAttempts, String vertexPrefix, boolean excludeMeta, boolean appendSigma) {
+	protected GuestTreeMachina(String seed, int min, int max, int minper, int maxper, List<Integer> leafSizes, int maxAttempts, String vertexPrefix, boolean excludeMeta, boolean appendSigma, boolean isSpecies) {
 		this.prng = (seed == null ? new PRNG() : new PRNG(new BigInteger(seed)));
 		this.min = min;
 		this.max = max;
@@ -59,6 +61,7 @@ public class GuestTreeMachina {
 		this.excludeMeta = excludeMeta;
 		this.attempts = 0;
 		this.appendSigma = appendSigma;
+		this.isSpecies = isSpecies;
 	}
 		
 	/**
@@ -69,7 +72,7 @@ public class GuestTreeMachina {
 	 * @throws TopologyException.
 	 * @throws MaxAttemptsException.
 	 */
-	public Pair<PrIMENewickTree,PrIMENewickTree> sampleGuestTree(UnprunedGuestTreeCreator mightyGodPlaysDice) throws NewickIOException, TopologyException, MaxAttemptsException {
+	public Pair<PrIMENewickTree,PrIMENewickTree> sampleGuestTree(UnprunedGuestTreeCreator mightyGodPlaysDice, DomainTreeGenParameters params) throws NewickIOException, TopologyException, MaxAttemptsException {
 		
 		this.attempts = 0;
 		List<Integer> hostLeaves = mightyGodPlaysDice.getHostLeaves();
@@ -98,11 +101,11 @@ public class GuestTreeMachina {
 				int no = PruningHelper.labelUnprunableVertices(unprunedRoot, 0, vertexPrefix, appendSigma);
 				PruningHelper.labelPrunableVertices(unprunedRoot, no, vertexPrefix, appendSigma);
 				attempts++;
-			} while (!unprunedIsOK(unprunedRoot, exact, hostLeaves));
+			} while (!unprunedIsOK(unprunedRoot, exact, hostLeaves, mightyGodPlaysDice, params));
 			
 			// Set meta info.
 			if (!this.excludeMeta) {
-				GuestVertex.setMeta(unprunedRoot);
+				GuestVertex.setMeta(unprunedRoot, this.isSpecies);
 			}
 			
 			// Finally, an unpruned candidate tree.
@@ -124,7 +127,7 @@ public class GuestTreeMachina {
 	 * @param hostLeaves host leaves.
 	 * @return true if OK; otherwise false.
 	 */
-	protected boolean unprunedIsOK(GuestVertex root, int exact, List<Integer> hostLeaves) {
+	protected boolean unprunedIsOK(GuestVertex root, int exact, List<Integer> hostLeaves, UnprunedGuestTreeCreator mightyGodPlaysDice, DomainTreeGenParameters params) {
 		int sampledLeaves = 0;
 		LinkedList<NewickVertex> vertices = new LinkedList<NewickVertex>();
 		HashMap<Integer, Integer> sigmaCnt = new HashMap<Integer, Integer>(512); 
@@ -156,6 +159,16 @@ public class GuestTreeMachina {
 			if (cnt == null) { cnt = 0; }
 			if (cnt < minper || cnt > maxper) {
 				return false;
+			}
+		}
+		if (params != null) {
+			if (params.all_genes) {
+				HashMap<RBTreeEpochDiscretiser, Integer> used = mightyGodPlaysDice.getUsed();
+				for (RBTreeEpochDiscretiser tree : used.keySet()) {
+					if (used.get(tree).equals(0)) {
+						return false;
+					}
+				}
 			}
 		}
 		return true;

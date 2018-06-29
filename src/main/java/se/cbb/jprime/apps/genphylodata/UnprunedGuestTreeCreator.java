@@ -1,9 +1,11 @@
 package se.cbb.jprime.apps.genphylodata;
 
+import java.util.HashMap;
 import java.util.List;
 
 import se.cbb.jprime.io.NewickIOException;
 import se.cbb.jprime.math.PRNG;
+import se.cbb.jprime.topology.RBTreeEpochDiscretiser;
 
 /**
  * Interface of the all-mighty unpruned tree creators.
@@ -11,6 +13,8 @@ import se.cbb.jprime.math.PRNG;
  * @author Joel Sjöstrand.
  */
 public interface UnprunedGuestTreeCreator {
+	
+	public HashMap<RBTreeEpochDiscretiser, Integer> getUsed();
 
 	/**
 	 * Creates an unpruned tree. Appropriate labelling of vertices may not be in place in the returned tree.
