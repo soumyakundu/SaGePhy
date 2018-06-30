@@ -1,18 +1,18 @@
-#An Improved Probabilistic Simulation Framework for Gene Family Evolution
+# An Improved Probabilistic Simulation Framework for Gene Family Evolution
 
 **Author:** *Soumya Kundu*
 
-##HostTreeGen:
+## HostTreeGen:
 
-###Usage:
+### Usage:
 
 java -jar jprime-0.3.7.jar HostTreeGen [options] <time interval> <birth rate> <death rate> <out prefix>
 
-###Required Arguments:
+### Required Arguments:
 
 <time interval> <birth rate> <death rate> <out prefix>
 
-###Options:
+### Options:
 
 -h, --help
 
