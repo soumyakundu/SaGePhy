@@ -191,8 +191,8 @@ public class GuestVertex extends NewickVertex {
 		while (!vertices.isEmpty()) {
 			GuestVertex v = (GuestVertex) vertices.pop();
 			StringBuilder sb = new StringBuilder(1024);
-			sb.append("[&&PRIME");
-			sb.append(" ID=").append(v.getNumber());
+			//sb.append("[&&PRIME");
+			sb.append("[ID=").append(v.getNumber());
 			if (!isSpecies) {
 				sb.append(" HOST=").append(v.getHostVertex());
 				sb.append(" GUEST=").append(v.getGuestTree());
