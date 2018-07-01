@@ -122,4 +122,36 @@ Set the probability of a horizontal gene transfer event being a replacing transf
 
 -db, --distance-bias
 
-Select the type of 
+Select the type of distance-bias to use when sampling transfer recipients. The three options are: none, simple, exponential. Default: none
+
+None disables distance-bias and samples transfer recipients uniformly at random.
+
+Simple implements a distance-bias that scales proportionally to the inverse of the phylogenetic distance.
+
+Exponential implements a distance-bias that scales exponentially in relation to the phylogenetic distance.
+
+-dbr, --distance-bias-rate
+
+When using the exponential distance-bias, set the rate parameter of the exponential distribution to be used. Default: 1.0
+
+A higher value more strongly biases the selection of the transfer recipient towards one that is phylogenetically closer to the origin of the transfer.
+
+-gb, --gene-birth-sampling
+
+Randomly sample the location of gene birth on the species tree.
+
+-gbc, --gene-birth-coefficient
+
+Set level of bias towards root of species tree for gene tree birth location. Default: 1.0
+
+A higher value more strongly biases the location of gene birth towards the root of the species tree.
+
+### Example:
+
+java -jar jprime-0.3.7.jar GuestTreeGen -rt 0.6 -db exponential -dbr 1.5 -gb -gbc 2.1 species.pruned.tree 0.2 0.1 0.3 gene
+
+---
+
+## DomainTreeGen
+
+
