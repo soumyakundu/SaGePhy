@@ -1271,7 +1271,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 				vertices.add(v.getRightChild());
 			} else {
 				if (v.event == Event.LEAF || v.event == Event.UNSAMPLED_LEAF) {
-					sb.append(v.getName()).append('\t').append(guestNames.get(guestTrees.indexOf(v.guestTree)).get(v.sigma)).append('\n');
+					sb.append(v.getName()).append('\t').append(guestNames.get(guestTrees.indexOf(v.guestTree)).get(v.sigma)).append('\t').append(v.treeName).append('\n');
 				}
 			}
 		}
