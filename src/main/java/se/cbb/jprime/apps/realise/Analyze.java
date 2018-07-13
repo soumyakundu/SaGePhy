@@ -375,7 +375,7 @@ public class Analyze implements JPrIMEApp {
 		// Function
 		
 		String truetree2 = tt2.toString();
-		PrIMENewickTree tree2 = PrIMENewickTreeReader.readTree(truetree2, false, true);
+		PrIMENewickTree tree2 = PrIMENewickTreeReader.readTree(truetree2, false, true, null);
 		RBTree rbtree2 = new RBTree((NewickTree) tree2,"");
 
 		for(int ver=0; ver < TrueNamesMap.getSize(); ver++)
@@ -407,7 +407,7 @@ public class Analyze implements JPrIMEApp {
 		// Function
 		
 		String truetree2 = tt2.toString();
-		PrIMENewickTree tree2 = PrIMENewickTreeReader.readTree(truetree2, false, true);
+		PrIMENewickTree tree2 = PrIMENewickTreeReader.readTree(truetree2, false, true, null);
 		RBTree rbtree2 = new RBTree((NewickTree) tree2,"");
 		
 		for(int ver=0; ver < TrueNamesMap.getSize(); ver++)

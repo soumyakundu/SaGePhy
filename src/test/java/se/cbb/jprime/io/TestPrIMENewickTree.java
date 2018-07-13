@@ -22,7 +22,7 @@ public class TestPrIMENewickTree {
 	
 	@Test
 	public void readUnstrict() throws NewickIOException {
-		PrIMENewickTree t = PrIMENewickTreeReader.readTree(in, true, false);
+		PrIMENewickTree t = PrIMENewickTreeReader.readTree(in, true, false, null);
 		assertTrue(t.getTreeName().equals("TestTree"));
 		assertTrue(t.hasProperty(MetaProperty.BRANCH_LENGTHS));
 		assertFalse(t.hasProperty(MetaProperty.ARC_TIMES));
@@ -39,6 +39,6 @@ public class TestPrIMENewickTree {
 	@Test(expected=NewickIOException.class)
 	public void readStrict() throws NewickIOException {
 		// Input tree lacks some branch lengths.
-		PrIMENewickTreeReader.readTree(in, true, true);
+		PrIMENewickTreeReader.readTree(in, true, true, null);
 	}
 }

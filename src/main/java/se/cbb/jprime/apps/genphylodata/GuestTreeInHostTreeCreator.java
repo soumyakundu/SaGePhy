@@ -1,6 +1,7 @@
 package se.cbb.jprime.apps.genphylodata;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,6 +53,8 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	/** Transfer distance bias. */
 	private String distance_bias;
 	
+	private double distance_bias_rate;
+	
 	private Boolean doGeneBirth;
 	
 	/** Gene birth sampling bias. */
@@ -62,7 +65,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 	/** Sampling probability. */
 	private double rho;
-
+	
 	/**
 	 * Constructor.
 	 * @param host host tree.
@@ -74,10 +77,10 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	 * @throws NewickIOException.
 	 */
 
-	public GuestTreeInHostTreeCreator(PrIMENewickTree host, double lambda, double mu, double tau, double theta, String distance_bias, boolean doGeneBirth, double gene_birth, boolean ishost, double rho, Double stem) throws TopologyException, NewickIOException {
+	public GuestTreeInHostTreeCreator(PrIMENewickTree host, double lambda, double mu, double tau, double theta, String distance_bias, double distance_bias_rate, boolean doGeneBirth, double gene_birth, boolean ishost, double rho, Double stem) throws TopologyException, NewickIOException {
 
 		// Host tree.
-		RBTree S = new RBTree(host, "HostTree");
+		RBTree S = new RBTree(host, host.getTreeName());
 		TimesMap hostTimes = host.getTimesMap("HostTimes");
 		this.hostNames = host.getVertexNamesMap(true, "HostNames");
 		if (stem != null) {
@@ -97,6 +100,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		this.tau = tau;
 		this.theta = theta;
 		this.distance_bias = distance_bias;
+		this.distance_bias_rate = distance_bias_rate;
 		this.doGeneBirth = doGeneBirth;
 		this.gene_birth = gene_birth;
 		this.ishost = ishost;
@@ -174,7 +178,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			} else if (lin.event == Event.ADDITIVE_TRANSFER) {
 				if (prng.nextDouble() < 0.5) {
 					lc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
+					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, this.distance_bias_rate, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 					lin.setTransferedFromArc(lin.sigma);
 					rc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
 					lin.setTransferedToArc(lin.epoch.getTransferedToArc());
@@ -183,7 +187,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 				} else {
 					rc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, this.distance_bias_rate, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 					lin.setTransferedFromArc(lin.sigma);
 					lc = this.createGuestVertex(transferedToArc, lin.abstime, prng);
 					lin.setTransferedToArc(lin.epoch.getTransferedToArc());
@@ -194,7 +198,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			} else if (lin.event == Event.REPLACING_TRANSFER) {
 				if (prng.nextDouble() < 0.5) {
 					lc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, this.distance_bias_rate, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 					lin.setTransferedFromArc(lin.sigma);
 					lin.setTransferedToArc(lin.epoch.getTransferedToArc());
 
@@ -208,7 +212,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						}
 
 						if (emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)) {
-							lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, emptyArcs, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
+							lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, this.distance_bias_rate, emptyArcs, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 							node = findVertex(root, lin);
 						}
 					}
@@ -238,7 +242,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 				} else {
 					rc = this.createGuestVertex(lin.sigma, lin.abstime, prng);
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, this.distance_bias_rate, null, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 					lin.setTransferedFromArc(lin.sigma);
 					lin.setTransferedToArc(lin.epoch.getTransferedToArc());
 
@@ -252,7 +256,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						}
 
 						if (emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)) {
-							lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, emptyArcs, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
+							lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, this.distance_bias, this.distance_bias_rate, emptyArcs, hostTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), true);
 							node = findVertex(root, lin);
 						}
 					}
@@ -422,7 +426,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			}
 			epoch = this.hostTree.getEpoch(epno);
 		}
-		return new GuestVertex(event, X, epoch, eventTime, branchTime, this.hostTree, null);
+		return new GuestVertex(event, X, epoch, eventTime, branchTime, this.hostTree);
 	}
 
 	@Override
@@ -502,8 +506,8 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			double dupMLEst = NumberManipulation.roundToSignificantFigures(noOfDups / totalTime, 8);
 			double lossMLEst = NumberManipulation.roundToSignificantFigures(noOfLosses / totalTime, 8);
 			double replacing_lossMLEst = NumberManipulation.roundToSignificantFigures(noOfReplacing_Losses / totalTime, 8);
-			double additive_transMLEst = NumberManipulation.roundToSignificantFigures(noOfAdditive_Trans / totalTimeBeneathStem, 8);  // Excl. stem-spanning arcs.
-			double replacing_transMLEst = NumberManipulation.roundToSignificantFigures(noOfReplacing_Trans / totalTimeBeneathStem, 8);  // Excl. stem-spanning arcs.
+			double additive_transMLEst = NumberManipulation.roundToSignificantFigures(noOfAdditive_Trans / totalTime, 8);  // Excl. stem-spanning arcs.
+			double replacing_transMLEst = NumberManipulation.roundToSignificantFigures(noOfReplacing_Trans / totalTime, 8);  // Excl. stem-spanning arcs.
 			sb.append("Duplication ML estimate:\t").append(dupMLEst).append('\n');
 			sb.append("Loss ML estimate:\t").append(lossMLEst).append('\n');
 			sb.append("Replacing Loss ML estimate:\t").append(replacing_lossMLEst).append('\n');
@@ -564,5 +568,10 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	@Override
 	public String getHost() {
 		return this.hostTree.toString();
+	}
+	
+	@Override
+	public HashMap<RBTreeEpochDiscretiser, Integer> getUsed() {
+		return null;
 	}
 }

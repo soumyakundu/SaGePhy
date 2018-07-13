@@ -178,7 +178,7 @@ public class BranchRelaxerParameters {
 			// We do allow non-ultrametric trees to, if relaxing in multiple rounds.
 			return PrIMENewickTreeReader.readTree(f, false, doStrict);
 		} else {
-			return PrIMENewickTreeReader.readTree(s, false, doStrict);
+			return PrIMENewickTreeReader.readTree(s, false, doStrict, null);
 		}
 	}
 	

@@ -43,7 +43,7 @@ public class DomainTreeGen implements JPrIMEApp {
 				System.out.println(bibtex);
 				System.exit(0);
 			}
-			int noargs = params.doQuiet ? (params.no + 4) : (params.no + 5);
+			int noargs = params.doQuiet ? (5) : (6);
 			if (args.length == 0 || params.help || params.args.size() != noargs) {
 				StringBuilder sb = new StringBuilder(65536);
 				/**
@@ -75,7 +75,7 @@ public class DomainTreeGen implements JPrIMEApp {
 			
 			// Machine.
 			GuestTreeMachina machina = new GuestTreeMachina(params.seed, params.min, params.max, params.minper, params.maxper, params.getLeafSizes(), params.maxAttempts,
-					params.vertexPrefix, params.excludeMeta, params.appendSigma);
+					params.vertexPrefix, params.excludeMeta, params.appendSigma, false);
 			
 			// Machine motor.
 			UnprunedGuestTreeCreator motor = (params.hybrid == null || params.hybrid.isEmpty()) ? params.getHostTreeCreator() : params.getHostHybridGraphCreator();
@@ -83,7 +83,7 @@ public class DomainTreeGen implements JPrIMEApp {
 			// Create guest tree.
 			Pair<PrIMENewickTree, PrIMENewickTree> guestTree = null;
 			try {
-				guestTree  = machina.sampleGuestTree(motor);
+				guestTree  = machina.sampleGuestTree(motor, params);
 			} catch (MaxAttemptsException ex) {
 				if (!params.doQuiet) {
 					BufferedWriter outinfo = params.getOutputFile(".pruned.info");

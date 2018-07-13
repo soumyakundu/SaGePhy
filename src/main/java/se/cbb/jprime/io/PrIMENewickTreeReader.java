@@ -73,8 +73,12 @@ public class PrIMENewickTreeReader {
 	 * @return the tree.
 	 * @throws NewickIOException if sanity checks fail.
 	 */
-	public static PrIMENewickTree readTree(String str, boolean doSort, boolean strict) throws NewickIOException {
-		return new PrIMENewickTree(NewickTreeReader.readTree(str, doSort), strict);
+	public static PrIMENewickTree readTree(String str, boolean doSort, boolean strict, File f) throws NewickIOException {
+		PrIMENewickTree newTree = new PrIMENewickTree(NewickTreeReader.readTree(str, doSort), strict);
+		if (f != null) {
+			newTree.setTreeName(f.getName());
+		}
+		return newTree;
 	}
 	
 	/**
@@ -101,7 +105,7 @@ public class PrIMENewickTreeReader {
 			if (fis != null) try { fis.close(); } catch (IOException ex) {}
 		}
 	    String str = new String(buffer);
-	    return readTree(str, doSort, strict);
+	    return readTree(str, doSort, strict, f);
 	}
 	
 }

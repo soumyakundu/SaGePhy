@@ -73,7 +73,7 @@ public class UnparsedRealisation {
 	 * @throws NewickIOException.
 	 */
 	public UnparsedRealisation(String real, int realID, int subSampleID) throws NewickIOException, TopologyException {
-		this.tree = PrIMENewickTreeReader.readTree(real, true, true);
+		this.tree = PrIMENewickTreeReader.readTree(real, true, true, null);
 		this.treeAsNewickString = tree.toString();  // Guaranteed to be sorted unlike original string.
 		this.realID = realID;
 		this.subSampleID = subSampleID;
@@ -88,7 +88,7 @@ public class UnparsedRealisation {
 	 */
 	public static Realisation parseDLRSRealisation(String real) throws NewickIOException, TopologyException
 	{
-		PrIMENewickTree tree = PrIMENewickTreeReader.readTree(real, true, true);
+		PrIMENewickTree tree = PrIMENewickTreeReader.readTree(real, true, true, null);
 		TimesMap times = tree.getTimesMap(real);	
 		String[] names = new String[tree.getNoOfVertices()];
 		boolean[] isdups = new boolean[tree.getNoOfVertices()];
@@ -147,7 +147,7 @@ public class UnparsedRealisation {
 	 */
 	public static Realisation parseRealisation(String real) throws NewickIOException, TopologyException
 	{
-		PrIMENewickTree tree = PrIMENewickTreeReader.readTree(real, true, true);			// Sorts the gene tree
+		PrIMENewickTree tree = PrIMENewickTreeReader.readTree(real, true, true, null);			// Sorts the gene tree
 		TimesMap times = tree.getTimesMap(real);	
 		String[] names = new String[tree.getNoOfVertices()];
 		boolean[] isdups = new boolean[tree.getNoOfVertices()];
@@ -210,7 +210,7 @@ public class UnparsedRealisation {
 	 */
 	public static Realisation parseRealisation(String real, NamesMap trueNamesMap) throws NewickIOException, TopologyException
 	{
-		PrIMENewickTree tree = PrIMENewickTreeReader.readTree(real, true, true);			// Sorts the gene tree
+		PrIMENewickTree tree = PrIMENewickTreeReader.readTree(real, true, true, null);			// Sorts the gene tree
 		RBTree rbTree= new RBTree((NewickTree) tree,"");
 		String[] names = new String[tree.getNoOfVertices()];
 		TimesMap times = tree.getTimesMap(real);	

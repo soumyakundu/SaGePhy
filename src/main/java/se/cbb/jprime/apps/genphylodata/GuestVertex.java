@@ -60,9 +60,9 @@ public class GuestVertex extends NewickVertex {
 	/** Tranfered to arc */
 	int transferedToArc = -1;
 	
-	int transferedFromGuest = -1;
+	String transferedFromGuest = null;
 	
-	int transferedToGuest = -1;
+	String transferedToGuest = null;
 	
 	/** Epoch. Not always applicable. */
 	public Epoch epoch = null;
@@ -73,8 +73,8 @@ public class GuestVertex extends NewickVertex {
 	/** Guest tree. */
 	public RBTreeEpochDiscretiser guestTree;
 	
-	Integer guestTreeIndex;
-	
+	public String treeName;
+		
 	double branchtime;
 	
 	/**
@@ -91,7 +91,7 @@ public class GuestVertex extends NewickVertex {
 	 * @param abstime absolute time of the this vertex.
 	 * @param branchtime arc time of this vertex.
 	 */
-	public GuestVertex(Event event, int sigma, Epoch epoch, double abstime, double branchtime, RBTreeEpochDiscretiser guestTree, Integer guestTreeIndex) {
+	public GuestVertex(Event event, int sigma, Epoch epoch, double abstime, double branchtime, RBTreeEpochDiscretiser guestTree) {
 		super(-1, "", branchtime, "");
 		this.event = event;
 		this.sigma = sigma;
@@ -99,8 +99,9 @@ public class GuestVertex extends NewickVertex {
 		this.epoch = epoch;
 		this.abstime = abstime;
 		this.guestTree = guestTree;
-		this.guestTreeIndex = guestTreeIndex;
-		this.guest_tree = guestTreeIndex;
+		this.treeName = guestTree.getRBTree().getName();
+		this.guest_tree = guestTree.getRBTree().getName();
+		//System.out.println(guestTree.getRBTree().getName());
 		this.branchtime = branchtime;
 	}
 	
@@ -117,8 +118,8 @@ public class GuestVertex extends NewickVertex {
 		this.epoch = orig.epoch;
 		this.prunability = orig.prunability;
 		this.guestTree = orig.guestTree;
-		this.guestTreeIndex = orig.guestTreeIndex;
-		this.guest_tree = orig.guest_tree;
+		this.treeName = orig.treeName;
+		this.guest_tree = orig.treeName;
 		this.branchtime = orig.branchtime;
 	}
 	
@@ -138,19 +139,19 @@ public class GuestVertex extends NewickVertex {
 		return this.transferedFromArc;
 	}
 	
-	public void setTransferedToGuest(int x){
+	public void setTransferedToGuest(String x){
 		this.transferedToGuest = x;
 	}
 	
-	public int getTransferedToGuest(){
+	public String getTransferedToGuest(){
 		return this.transferedToGuest;
 	}
 	
-	public void setTransferedFromGuest(int x){
+	public void setTransferedFromGuest(String x){
 		this.transferedFromGuest= x;
 	}
 	
-	public int getTransferedFromGuest(){
+	public String getTransferedFromGuest(){
 		return this.transferedFromGuest;
 	}
 	
@@ -184,16 +185,16 @@ public class GuestVertex extends NewickVertex {
 	 * Helper.
 	 * @param root root.
 	 */
-	public static void setMeta(GuestVertex root) {
+	public static void setMeta(GuestVertex root, Boolean isSpecies) {
 		LinkedList<NewickVertex> vertices = new LinkedList<NewickVertex>();
 		vertices.add(root);
 		while (!vertices.isEmpty()) {
 			GuestVertex v = (GuestVertex) vertices.pop();
 			StringBuilder sb = new StringBuilder(1024);
-			sb.append("[&&PRIME");
-			sb.append(" ID=").append(v.getNumber());
-			sb.append(" HOST=").append(v.getHostVertex());
-			if (v.getGuestTree() != null) {
+			//sb.append("[&&PRIME");
+			sb.append("[ID=").append(v.getNumber());
+			if (!isSpecies) {
+				sb.append(" HOST=").append(v.getHostVertex());
 				sb.append(" GUEST=").append(v.getGuestTree());
 			}
 			switch (v.event) {
@@ -207,7 +208,11 @@ public class GuestVertex extends NewickVertex {
 					++j;
 				}
 				String dispt= "DISCPT=(" + v.epoch.getNo() + "," + j +")";
-				sb.append(" VERTEXTYPE=Duplication" + " "+ dispt);
+				if (isSpecies) {
+					sb.append(" VERTEXTYPE=Speciation" + " "+ dispt);
+				} else {
+					sb.append(" VERTEXTYPE=Duplication" + " "+ dispt);
+				}
 				break;
 				
 			case LOSS:
