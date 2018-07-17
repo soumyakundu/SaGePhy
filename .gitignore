@@ -2,7 +2,7 @@
 /bin/
 .settings/org.eclipse.m2e.core.prefs
 .DS_Store
-domain1.pruned.tree
-domain1.pruned.leafmap
-domain1.pruned.tree_seqs
-/dir_genes/
+/domains/
+/genes/
+/leafmaps/
+/seqs/
