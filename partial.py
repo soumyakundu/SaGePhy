@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys, subprocess, os, re, csv, random
+import sys, subprocess, os, re, csv, random, copy, argparse
 from operator import itemgetter
 
 def main(argv):
@@ -95,22 +95,25 @@ def append_seqs(domainseqs, geneseqs, leafmaps):
     for entry in os.listdir(leafmaps):
         with open(leafmaps + os.path.sep + entry, "r") as leafmapfile:
             for col in csv.reader(leafmapfile, delimiter="\t"):
+                #print("Trying insertion in Tree: " + str(col[2]) + " and Gene: " + str(col[1]) + " with History: " + str(genedict[col[2]][col[1]][1]))
                 domain = domaindict[entry.split("leafmap")[0].strip() + "tree"][col[0]]
                 gene = genedict[col[2]][col[1]][0]
                 gene_adds = genedict[col[2]][col[1]][1]
                 insert_at = (random.randint(0, len(gene) + 1), len(domain))
-                sorted_adds = gene_adds
+                sorted_adds = copy.deepcopy(gene_adds)
                 sorted_adds.append(insert_at)
                 sorted_adds.sort(key=itemgetter(0))
                 insert_index = sorted_adds.index(insert_at)
-                while ((sorted_adds[insert_index - 1][0] + sorted_adds[insert_index - 1][1] - 1) >= insert_index):
+                while (insert_index != 0 and (sorted_adds[insert_index - 1][0] + sorted_adds[insert_index - 1][1] - 1) >= insert_at[0]):
                     if insert_at[0] == 0 or insert_at[0] == len(gene):
                         break
-                    insert_at = (random.randint(0, len(gene) + 2 * len(domain)), len(domain))
-                    sorted_adds = gene_adds
+                    #print(insert_at[0])
+                    insert_at = (random.randint(0, len(gene) + 1), len(domain))
+                    sorted_adds = copy.deepcopy(gene_adds)
                     sorted_adds.append(insert_at)
                     sorted_adds.sort(key=itemgetter(0))
                     insert_index = sorted_adds.index(insert_at)
+                #print("Insertion at: " + str(insert_at[0]) + " in Tree: " + str(col[2]) + " and Gene: " + str(col[1]))
                 genedict[col[2]][col[1]] = (genedict[col[2]][col[1]][0][:insert_at[0]] + domain + genedict[col[2]][col[1]][0][insert_at[0]:], sorted_adds)
                 new_tuples = genedict[col[2]][col[1]][1]
                 for i,j in enumerate(new_tuples):

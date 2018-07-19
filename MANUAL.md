@@ -6,11 +6,11 @@
 
 ### Usage:
 
-java -jar jprime-0.3.7.jar HostTreeGen [options] <time interval> <birth rate> <death rate> <out prefix>
+java -jar jprime-0.3.7.jar HostTreeGen [options] {time interval} {birth rate} {death rate} {out prefix}
 
 ### Required Arguments:
 
-<time interval> <birth rate> <death rate> <output prefix>
+{time interval} {birth rate} {death rate} {output prefix}
 
 ### Options:
 
@@ -64,11 +64,11 @@ java -jar jprime-0.3.7.jar HostTreeGen -min 100 -max 100 1.0 5.0 0.05 species
 
 ### Usage:
 
-java -jar jprime-0.3.7.jar GuestTreeGen [options] <host tree> <dup rate> <loss rate> <trans rate> <out prefix>
+java -jar jprime-0.3.7.jar GuestTreeGen [options] {host tree} {dup rate} {loss rate} {trans rate} {out prefix}
 
 ### Required arguments:
 
-<host tree file or string> <duplication rate> <loss rate> <transfer rate> <output prefix>
+{host tree file or string} {duplication rate} {loss rate} {transfer rate} {output prefix}
 
 ### Options:
 
@@ -156,11 +156,11 @@ java -jar jprime-0.3.7.jar GuestTreeGen -rt 0.6 -db exponential -dbr 1.5 -gb -gb
 
 ### Usage:
 
-java -jar jprime-0.3.7.jar DomainTreeGen [options] <host tree> <guest trees> <dup rate> <loss rate> <trans rate> <out prefix>
+java -jar jprime-0.3.7.jar DomainTreeGen [options] {host tree} {guest trees} {dup rate} {loss rate} {trans rate} {out prefix}
 
 ### Required arguments:
 
-<host tree file or string> <guest tree folder> <duplication rate> <loss rate> <transfer rate> <output prefix>
+{host tree file or string} {guest tree folder} {duplication rate} {loss rate} {transfer rate} {output prefix}
 
 ### Options:
 
