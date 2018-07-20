@@ -1,28 +1,46 @@
 #!/usr/bin/python3
 
-import sys, subprocess, os, re, csv, random, copy, argparse
+import sys, subprocess, os, re, csv, random, copy, argparse, atexit
 from operator import itemgetter
 
 def main(argv):
 
-    parse_args(argv)
+    args = get_args(argv)
 
     make_dirs()
 
-    for entry in os.listdir(argv[0]):
-        if not os.path.isdir(argv[0] + os.path.sep + entry):
-            run_seqgen(argv[0], entry, "domains", "100")
+    for entry in os.listdir(args.domain_dir):
+        if not os.path.isdir(args.domain_dir + os.path.sep + entry):
+            run_seqgen(args.domain_dir, entry, "domains", args.domain_length, args)
 
-    for entry in os.listdir(argv[1]):
-        if not os.path.isdir(argv[1] + os.path.sep + entry):
-            run_seqgen(argv[1], entry, "genes", "1000")
+    for entry in os.listdir(args.gene_dir):
+        if not os.path.isdir(args.gene_dir + os.path.sep + entry):
+            run_seqgen(args.gene_dir, entry, "genes", args.gene_length, args)
 
-    append_seqs("seqs" + os.path.sep + "domains", "seqs" + os.path.sep + "genes", argv[2])
+    append_seqs("seqs" + os.path.sep + "domains", "seqs" + os.path.sep + "genes", args.leafmap_dir)
 
 #-----------------------------------------------------------------------------#
 
-def parse_args(argv):
-    pass
+def get_args(argv):
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("domain_dir", help="Directory of input domain trees.")
+    parser.add_argument("gene_dir", help="Directory of input gene trees.")
+    parser.add_argument("leafmap_dir", help="Directory of domain to gene leaf maps.")
+    parser.add_argument("-dl", "--domain-length", default="100", help="Length of domain sequences [default = 100].")
+    parser.add_argument("-gl", "--gene-length", default="1000", help="Length of gene sequences [default = 1000].")
+    parser.add_argument("-s", "--branch-scaling", default="1.0", help="Branch length scaling factor [default = 1.0].")
+    parser.add_argument("-m", "--model", default="GTR", help="HKY, F84, GTR, JTT, WAG, PAM, BLOSUM, MTREV, CPREV45, MTART, LG, GENERAL" + "\n" + " HKY, F84 & GTR are for nucleotides the rest are for amino acids [default = GTR].")
+    parser.add_argument("-a", "--alpha", default="1.0", help="Shape (alpha) for gamma rate heterogeneity [default = 1.0].")
+    parser.add_argument("-g", "--gamma-cats", help="Number of gamma rate categories [default = continuous].")
+    parser.add_argument("-i", "--invariable-sites", default="0.0", help="Proportion of invariable sites [default = 0.0].")
+    parser.add_argument("-c", "--codon", help="#1 #2 #3 = Rates for codon position heterogeneity [default = none].")
+    parser.add_argument("-t", "--transition-transversion", default="1.0", help="Transition-transversion ratio [default = equal rate].")
+    parser.add_argument("-r", "--rate-matrix", help="#1 #2 #3 #4 #5 #6 = General rate matrix [default = all 1.0].")
+    parser.add_argument("-f", "--char-frequencies", default="e", help="#A #C #G #T = Nucleotide frequencies [default = all equal] or #1 .. #20 = Amino acid frequencies e = equal [default = matrix freqs].")
+    parser.add_argument("-z", "--seed", help="Seed for random number generator [default = system generated].")
+    args = parser.parse_args()
+    return args
 
 #-----------------------------------------------------------------------------#
 
@@ -45,7 +63,7 @@ def make_dirs():
 
 #-----------------------------------------------------------------------------#
 
-def run_seqgen(treedir, tree, dirtype, seqlen):
+def run_seqgen(treedir, tree, dirtype, seqlen, args):
 
     infile_old = open(treedir + os.path.sep + tree, "r")
     line = infile_old.readlines()[0]
@@ -58,8 +76,30 @@ def run_seqgen(treedir, tree, dirtype, seqlen):
     infile = open(treedir + os.path.sep + tree + "_temp", "r")
 
     outfile = open("seqs" + os.path.sep + dirtype + os.path.sep + (("pre_transfer" + os.path.sep) if dirtype == "genes" else ("")) + tree, "w")
-    subprocess.call(["../seq-gen", "-l", seqlen, "-m", "GTR", "-a", "1", "-of"],
-                    stdin=infile, stdout=outfile)
+
+    call_list = ["../seq-gen", "-l", seqlen, "-s", args.branch_scaling, "-m", args.model, "-a", args.alpha, "-i", args.invariable_sites, "-of"]
+
+    if args.gamma_cats != None:
+        call_list.append("-g")
+        call_list.append(args.gamma_cats)
+
+    if args.codon != None:
+        call_list.append("-c")
+        call_list.append(args.codon)
+
+    if args.model == "HKY" or args.model == "F84":
+        call_list.append("-t")
+        call_list.append(args.transition_transversion)
+
+    if args.rate_matrix != None:
+        call_list.append("-r")
+        call_list.append(args.rate_matrix)
+
+    if args.seed != None:
+        call_list.append("-z")
+        call_list.append(args.seed)
+
+    subprocess.call(call_list, stdin=infile, stdout=outfile)
 
     os.remove(treedir + os.path.sep + tree + "_temp")
 
