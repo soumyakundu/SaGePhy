@@ -2,3 +2,7 @@
 /bin/
 .settings/org.eclipse.m2e.core.prefs
 .DS_Store
+/domains/
+/genes/
+/leafmaps/
+/seqs/
