@@ -17,7 +17,7 @@ def main(argv):
         if not os.path.isdir(args.gene_dir + os.path.sep + entry):
             run_seqgen(args.gene_dir, entry, "genes", args.gene_length, args)
 
-    append_seqs("seqs" + os.path.sep + "domains", "seqs" + os.path.sep + "genes", args.leafmap_dir)
+    append_seqs("seqs" + os.path.sep + "domains", "seqs" + os.path.sep + "genes", args.leafmap_dir, args.append_domain)
 
 #-----------------------------------------------------------------------------#
 
@@ -29,6 +29,7 @@ def get_args(argv):
     parser.add_argument("leafmap_dir", help="Directory of domain to gene leaf maps.")
     parser.add_argument("-dl", "--domain-length", default="100", help="Length of domain sequences [default = 100].")
     parser.add_argument("-gl", "--gene-length", default="1000", help="Length of gene sequences [default = 1000].")
+    parser.add_argument("-ap", "--append-domain", help="Append domain sequences to gene sequences instead of random insertion.", action="store_true")
     parser.add_argument("-s", "--branch-scaling", default="1.0", help="Branch length scaling factor [default = 1.0].")
     parser.add_argument("-m", "--model", default="GTR", help="HKY, F84, GTR, JTT, WAG, PAM, BLOSUM, MTREV, CPREV45, MTART, LG, GENERAL" + "\n" + " HKY, F84 & GTR are for nucleotides the rest are for amino acids [default = GTR].")
     parser.add_argument("-a", "--alpha", default="1.0", help="Shape (alpha) for gamma rate heterogeneity [default = 1.0].")
@@ -77,7 +78,7 @@ def run_seqgen(treedir, tree, dirtype, seqlen, args):
 
     outfile = open("seqs" + os.path.sep + dirtype + os.path.sep + (("pre_transfer" + os.path.sep) if dirtype == "genes" else ("")) + tree, "w")
 
-    call_list = ["../seq-gen", "-l", seqlen, "-s", args.branch_scaling, "-m", args.model, "-a", args.alpha, "-i", args.invariable_sites, "-of"]
+    call_list = ["./seq-gen", "-l", seqlen, "-s", args.branch_scaling, "-m", args.model, "-a", args.alpha, "-i", args.invariable_sites, "-of"]
 
     if args.gamma_cats != None:
         call_list.append("-g")
@@ -105,7 +106,7 @@ def run_seqgen(treedir, tree, dirtype, seqlen, args):
 
 #-----------------------------------------------------------------------------#
 
-def append_seqs(domainseqs, geneseqs, leafmaps):
+def append_seqs(domainseqs, geneseqs, leafmaps, append_domain):
 
     domaindict = {}
     genedict = {}
@@ -138,28 +139,31 @@ def append_seqs(domainseqs, geneseqs, leafmaps):
                 #print("Trying insertion in Tree: " + str(col[2]) + " and Gene: " + str(col[1]) + " with History: " + str(genedict[col[2]][col[1]][1]))
                 domain = domaindict[entry.split("leafmap")[0].strip() + "tree"][col[0]]
                 gene = genedict[col[2]][col[1]][0]
-                gene_adds = genedict[col[2]][col[1]][1]
-                insert_at = (random.randint(0, len(gene) + 1), len(domain))
-                sorted_adds = copy.deepcopy(gene_adds)
-                sorted_adds.append(insert_at)
-                sorted_adds.sort(key=itemgetter(0))
-                insert_index = sorted_adds.index(insert_at)
-                while (insert_index != 0 and (sorted_adds[insert_index - 1][0] + sorted_adds[insert_index - 1][1] - 1) >= insert_at[0]):
-                    if insert_at[0] == 0 or insert_at[0] == len(gene):
-                        break
-                    #print(insert_at[0])
+                if append_domain:
+                    genedict[col[2]][col[1]] = (genedict[col[2]][col[1]][0] + domain, genedict[col[2]][col[1]][1])
+                else:
+                    gene_adds = genedict[col[2]][col[1]][1]
                     insert_at = (random.randint(0, len(gene) + 1), len(domain))
                     sorted_adds = copy.deepcopy(gene_adds)
                     sorted_adds.append(insert_at)
                     sorted_adds.sort(key=itemgetter(0))
                     insert_index = sorted_adds.index(insert_at)
-                #print("Insertion at: " + str(insert_at[0]) + " in Tree: " + str(col[2]) + " and Gene: " + str(col[1]))
-                genedict[col[2]][col[1]] = (genedict[col[2]][col[1]][0][:insert_at[0]] + domain + genedict[col[2]][col[1]][0][insert_at[0]:], sorted_adds)
-                new_tuples = genedict[col[2]][col[1]][1]
-                for i,j in enumerate(new_tuples):
-                    if i > insert_index:
-                        new_tuples[i] = (j[0] + 1, j[1])
-                genedict[col[2]][col[1]] = (genedict[col[2]][col[1]][0], new_tuples)
+                    while (insert_index != 0 and (sorted_adds[insert_index - 1][0] + sorted_adds[insert_index - 1][1] - 1) >= insert_at[0]):
+                        if insert_at[0] == 0 or insert_at[0] == len(gene):
+                            break
+                        #print(insert_at[0])
+                        insert_at = (random.randint(0, len(gene) + 1), len(domain))
+                        sorted_adds = copy.deepcopy(gene_adds)
+                        sorted_adds.append(insert_at)
+                        sorted_adds.sort(key=itemgetter(0))
+                        insert_index = sorted_adds.index(insert_at)
+                    #print("Insertion at: " + str(insert_at[0]) + " in Tree: " + str(col[2]) + " and Gene: " + str(col[1]))
+                    genedict[col[2]][col[1]] = (genedict[col[2]][col[1]][0][:insert_at[0]] + domain + genedict[col[2]][col[1]][0][insert_at[0]:], sorted_adds)
+                    new_tuples = genedict[col[2]][col[1]][1]
+                    for i,j in enumerate(new_tuples):
+                        if i > insert_index:
+                            new_tuples[i] = (j[0] + 1, j[1])
+                    genedict[col[2]][col[1]] = (genedict[col[2]][col[1]][0], new_tuples)
 
     for entry in os.listdir(geneseqs + os.path.sep + "pre_transfer"):
         with open(geneseqs + os.path.sep + "post_transfer" + os.path.sep + entry, "w") as newgenefile:
