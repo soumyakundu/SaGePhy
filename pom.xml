@@ -3,8 +3,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>se.cbb</groupId>
-  <artifactId>jprime</artifactId>
-  <version>0.3.7</version>
+  <artifactId>SaGePhy</artifactId>
+  <version>1.0</version>
   <packaging>jar</packaging>
 
   <name>JPrIME</name>
