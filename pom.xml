@@ -2,12 +2,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>se.cbb</groupId>
-  <artifactId>SaGePhy</artifactId>
-  <version>1.0</version>
+  <groupId>uc.sgp</groupId>
+  <artifactId>sagephy</artifactId>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
-  <name>JPrIME</name>
+  <name>SaGePhy</name>
   <description>Probabilistic phylogenetic inference tools (and more).</description>
 
   <properties>
@@ -148,13 +148,15 @@
 		<type>jar</type>
 		<scope>compile</scope>
 	</dependency>
-	<dependency>
-		<groupId>org</groupId>
-		<artifactId>mdsj</artifactId>
-		<version>0.2.0</version>
-		<type>jar</type>
-		<scope>compile</scope>
-	</dependency>
+    <!--
+	    <dependency>
+		    <groupId>org</groupId>
+		    <artifactId>mdsj</artifactId>
+		    <version>0.2.0</version>
+		    <type>jar</type>
+		    <scope>compile</scope>
+	    </dependency>
+    -->
 	<dependency>
 		<groupId>org.reflections</groupId>
 		<artifactId>reflections</artifactId>
@@ -214,7 +216,7 @@
           			<archive>
 			            <manifest>
 			              <addClasspath>true</addClasspath>
-			              <mainClass>se.cbb.jprime.apps.JPrIMEStarter</mainClass>
+			              <mainClass>uc.sgp.sagephy.apps.SaGePhyStarter</mainClass>
 			            </manifest>
           			</archive>
         		</configuration>
