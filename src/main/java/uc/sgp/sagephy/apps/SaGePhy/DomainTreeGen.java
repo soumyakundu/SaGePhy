@@ -54,7 +54,7 @@ public class DomainTreeGen implements SaGePhyApp {
 						"================================================================================\n");
 				*/
 				sb.append("Usage:\n" +
-						"    java -jar sagephy-X.Y.Z.jar DomainTreeGen [options] <host tree file or string> <guest tree file(s) or string(s)> <dup rate> <loss rate> <trans rate> <out prefix>\n");
+						"    java -jar sagephy-X.Y.Z.jar DomainTreeGen [options] <host tree file or string> <guest tree directory> <dup rate> <loss rate> <trans rate> <out prefix>\n");
 				JCommanderUsageWrapper.getUnsortedUsage(jc, params, sb);
 				System.out.println(sb.toString());
 				return;
