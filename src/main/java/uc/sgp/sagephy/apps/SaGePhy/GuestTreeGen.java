@@ -33,26 +33,6 @@ public class GuestTreeGen implements SaGePhyApp {
 			int noargs = params.doQuiet ? 4 : 5;
 			if (args.length == 0 || params.help || params.args.size() != noargs) {
 				StringBuilder sb = new StringBuilder(65536);
-                /*
-				sb.append(
-						"================================================================================\n" +
-						"GuestTreeGen is part of the SaGePhy-GenPhyloData suite of tools for creating\n" +
-						"realistic phylogenetic data. GuestTreeGen takes a Newick \"host\" tree with\n" +
-						"ultrametric branch lengths and generates a \"guest\" tree evolving inside the\n" +
-						"host tree. This is achieved through a canonical extension of a birth-death\n" +
-						"process, in which guest tree lineages may be duplicated, lost, or laterally\n" +
-						"transferred (i.e., be split with one copy being transferred to a contemporaneous\n" +
-						"host edge). Guest lineages branch deterministically at host tree vertices.\n" +
-						"Auxiliary files detailing the process are also created by default.\n\n" +
-						"It is now also possible to generate gene trees over hybrid graphs. This is\n" +
-						"covered in more detail in the online tutorial.\n\n" +
-						"References:\n" +
-						"    Sjöstrand J, Arvestad L, Lagergren J, Sennblad B (2013)\n" +
-						"    GenPhyloData: realistic simulation of gene family evolution. BMC Bioinformatics 14, 209.\n\n" +
-						"Releases, tutorial, etc: https://github.com/arvestad/jprime/wiki/" +
-						"License: SaGePhy is available under the New BSD License.\n" +
-						"================================================================================\n");
-                */
 				sb.append("Usage:\n" +
 						"    java -jar sagephy-X.Y.Z.jar GuestTreeGen [options] <host tree> <dup rate> <loss rate> <trans rate> <out prefix>\n");
 				JCommanderUsageWrapper.getUnsortedUsage(jc, params, sb);

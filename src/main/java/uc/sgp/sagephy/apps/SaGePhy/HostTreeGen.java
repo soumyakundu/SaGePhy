@@ -36,21 +36,6 @@ public class HostTreeGen implements SaGePhyApp {
 			int noargs = params.doQuiet ? 3 : 4;
 			if (args.length == 0 || params.help || params.args.size() != noargs) {
 				StringBuilder sb = new StringBuilder(65536);
-                /*
-				sb.append(
-						"================================================================================\n" +
-						"HostTreeGen is part of the SaGePhy-GenPhyloData suite of tools for creating\n" +
-						"realistic phylogenetic data. HostTreeGen takes a time interval, a birth rate\n" +
-						"and a death rate as input, and generates a bifurcating tree over the interval\n" +
-						"by means of a birth-death process. Auxiliary files detailing the process are\n" +
-						"also created by default.\n\n" +
-						"References:\n" +
-						"    Sjöstrand J, Arvestad L, Lagergren J, Sennblad B (2013)\n" +
-						"    GenPhyloData: realistic simulation of gene family evolution. BMC Bioinformatics 14, 209.\n\n" +
-						"Releases, tutorial, etc: https://github.com/arvestad/jprime/wiki/" +
-						"License: SaGePhy is available under the New BSD License.\n" +
-						"================================================================================\n");
-                */
 				sb.append("Usage:\n" +
 						"    java -jar sagephy-X.Y.Z.jar HostTreeGen [options] <time interval> <birth rate> <death rate> <out prefix>\n");
 				JCommanderUsageWrapper.getUnsortedUsage(jc, params, sb);

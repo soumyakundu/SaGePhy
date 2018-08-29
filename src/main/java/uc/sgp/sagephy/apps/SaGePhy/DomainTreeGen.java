@@ -10,12 +10,6 @@ import uc.sgp.sagephy.io.NewickTreeWriter;
 import uc.sgp.sagephy.io.PrIMENewickTree;
 import uc.sgp.sagephy.misc.Pair;
 
-/**
- * Generates an ultrametric guest tree ("gene tree") involving inside a host tree ("species tree"),
- * by means of a BD process or similarly.
- * 
- * @author Joel Sjöstrand.
- */
 public class DomainTreeGen implements SaGePhyApp {
 	
 	@Override
