@@ -20,11 +20,6 @@ import uc.sgp.sagephy.topology.TopologyException;
 
 import com.beust.jcommander.Parameter;
 
-/**
- * Contains user settings.
- *
- * @author Joel Sjöstrand.
- */
 public class GuestTreeGenParameters {
 
 	/** Required parameters: S, lambda, mu, tau, outfile. */
@@ -104,18 +99,18 @@ public class GuestTreeGenParameters {
 	/** Type of distance bias for transfers. */
 	@Parameter(names = {"-db", "--distance-bias"}, description = "Type of distance-bias for horizontal gene transfers. Options: none, simple, exponential.")
 	public String distance_bias = "simple";
-	
+
 	/** Coefficient for transfer distance-bias. */
 	@Parameter(names = {"-dbr", "--distance-bias-rate"}, description = "Set level of bias towards recipients that are phylogenetically closer.")
 	public String distance_bias_rate = "1.0";
-	
+
 	@Parameter(names = {"-gb", "--gene-birth-sampling"}, description = "Randomly sample location of gene birth on species tree")
 	public Boolean doGeneBirth = false;
-	
+
 	/** Coefficient for sampling gene tree birth location. */
 	@Parameter(names = {"-gbc", "--gene-birth-coefficient"}, description = "Set level of bias towards root of species tree for gene tree birth location")
 	public String gene_birth = "1.0";
-	
+
 	/**
 	 * Returns output and info streams.
 	 * @return streams.
@@ -175,11 +170,11 @@ public class GuestTreeGenParameters {
 	public Double getReplacingTransferRate() {
 		return Double.parseDouble(this.replacing_transfers);
 	}
-	
+
 	public Double getDistanceBiasRate() {
 		return Double.parseDouble(this.distance_bias_rate);
 	}
-	
+
 	public Double getGeneBirthSampling() {
 		return Double.parseDouble(this.gene_birth);
 	}

@@ -14,11 +14,6 @@ import uc.sgp.sagephy.io.PrIMENewickTreeReader;
 import uc.sgp.sagephy.math.NumberManipulation;
 import uc.sgp.sagephy.misc.Pair;
 
-/**
- * Generates a synthetic bifurcating tree ("species tree") by means of a BD process or similarly.
- *
- * @author Joel Sjöstrand.
- */
 public class HostTreeGen implements SaGePhyApp {
 
 	@Override

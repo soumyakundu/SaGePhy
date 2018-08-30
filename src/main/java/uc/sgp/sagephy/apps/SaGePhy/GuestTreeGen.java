@@ -10,14 +10,8 @@ import uc.sgp.sagephy.io.NewickTreeWriter;
 import uc.sgp.sagephy.io.PrIMENewickTree;
 import uc.sgp.sagephy.misc.Pair;
 
-/**
- * Generates an ultrametric guest tree ("gene tree") involving inside a host tree ("species tree"),
- * by means of a BD process or similarly.
- * 
- * @author Joel Sjöstrand.
- */
 public class GuestTreeGen implements SaGePhyApp {
-	
+
 	@Override
 	public String getAppName() {
 		return "GuestTreeGen";
@@ -25,7 +19,7 @@ public class GuestTreeGen implements SaGePhyApp {
 
 	@Override
 	public void main(String[] args) throws Exception {
-		
+
 		try {
 			// ================ PARSE USER OPTIONS AND ARGUMENTS ================
 			GuestTreeGenParameters params = new GuestTreeGenParameters();
@@ -39,14 +33,14 @@ public class GuestTreeGen implements SaGePhyApp {
 				System.out.println(sb.toString());
 				return;
 			}
-			
+
 			// Machine.
 			GuestTreeMachina machina = new GuestTreeMachina(params.seed, params.min, params.max, params.minper, params.maxper, params.getLeafSizes(), params.maxAttempts,
 					params.vertexPrefix, params.excludeMeta, params.appendSigma, false);
-			
+
 			// Machine motor.
 			UnprunedGuestTreeCreator motor = (params.hybrid == null || params.hybrid.isEmpty()) ? params.getHostTreeCreator() : params.getHostHybridGraphCreator();
-			
+
 			// Create guest tree.
 			Pair<PrIMENewickTree, PrIMENewickTree> guestTree = null;
 			try {
@@ -60,7 +54,7 @@ public class GuestTreeGen implements SaGePhyApp {
 				System.err.println("Failed to produce valid pruned tree within max allowed attempts.");
 				System.exit(0);
 			}
-			
+
 			// Print output.
 			if (params.doQuiet) {
 				if (params.excludeMeta) {

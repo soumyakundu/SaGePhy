@@ -20,14 +20,8 @@ import uc.sgp.sagephy.topology.TopologyException;
 
 import com.beust.jcommander.Parameter;
 
-
-/**
- * Contains user settings.
- *
- * @author Soumya Kundu.
- */
 public class DomainTreeGenParameters {
-	
+
 	/** Required parameters. */
 	@Parameter(description = "<host tree file or string> <guest tree directory> <dup rate> <loss rate> <trans rate> <out prefix>")
 	public List<String> args = new ArrayList<String>();
@@ -105,27 +99,27 @@ public class DomainTreeGenParameters {
 	/** Type of distance bias for transfers. */
 	@Parameter(names = {"-db", "--distance-bias"}, description = "Type of distance-bias for horizontal gene transfers. Options: none, simple, exponential.")
 	public String distance_bias = "none";
-	
+
 	/** Coefficient for transfer distance-bias. */
 	@Parameter(names = {"-dbr", "--distance-bias-rate"}, description = "Set level of bias towards recipients that are phylogenetically closer.")
 	public String distance_bias_rate = "1.0";
-	
+
 	@Parameter(names = {"-dbs", "--domain-birth-sampling"}, description = "Randomly sample location of domain birth on gene tree.")
 	public Boolean doDomainBirth = false;
-	
+
 	/** Coefficient for sampling domain tree birth location. */
 	@Parameter(names = {"-dbc", "--domain-birth-coefficient"}, description = "Set level of bias towards root of gene tree for domain tree birth location.")
 	public String domain_birth = "1.0";
-	
+
 	@Parameter(names = {"-ig", "--inter-gene-transfers"}, description = "Probability of transfers across gene trees.")
 	public String inter_gene = "0.5";
-	
+
 	@Parameter(names = {"-is", "--inter-species-transfers"}, description = "Probability of transfers across species.")
 	public String inter_species = "0.5";
-	
+
 	@Parameter(names = {"-all", "--all-gene-trees"}, description = "Enforce the evolution of the domain tree in all gene trees.")
 	public Boolean all_genes = false;
-	
+
 	/**
 	 * Returns output and info streams.
 	 * @return streams.
@@ -149,7 +143,7 @@ public class DomainTreeGenParameters {
 		}
 		ArrayList<PrIMENewickTree> guests = new ArrayList<PrIMENewickTree>();
 		File dir = new File(this.args.get(1));
-		File[] genes = dir.listFiles();	
+		File[] genes = dir.listFiles();
 		for (File j : genes) {
 			guests.add(PrIMENewickTreeReader.readTree(j, false, true));
 		}
@@ -191,23 +185,23 @@ public class DomainTreeGenParameters {
 	public Double getReplacingTransferRate() {
 		return Double.parseDouble(this.replacing_transfers);
 	}
-	
+
 	public Double getDistanceBiasRate() {
 		return Double.parseDouble(this.distance_bias_rate);
 	}
-	
+
 	public Double getDomainBirthSampling() {
 		return Double.parseDouble(this.domain_birth);
 	}
-	
+
 	public Double getInterGeneTransfers() {
 		return Double.parseDouble(this.inter_gene);
 	}
-	
+
 	public Double getInterSpeciesTransfers() {
 		return Double.parseDouble(this.inter_species);
 	}
-	
+
 	public GuestTreeInHybridGraphCreator getHostHybridGraphCreator() throws GMLIOException, IOException {
 		String str = this.args.get(0);
 		File f = new File(str);
