@@ -8,18 +8,18 @@
   <packaging>jar</packaging>
 
   <name>SaGePhy</name>
-  <description>Probabilistic phylogenetic inference tools (and more).</description>
+  <description>Probabilistic simulation framework for sub-gene and gene phylogeny evolution.</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <scm>
-  	<url>https://github.com/arvestad/jprime.git</url>
+  	<url>https://github.com/soumyakundu/SaGePhy.git</url>
   </scm>
   <organization>
-  	<name>Computational biology groups at SciLifeLab, Stockholm, Sweden</name>
-  	<url>http://www.scilifelab.se</url>
+  	<name>Computational Biology Laboratory at the University of Connecticut, Storrs, CT</name>
+  	<url>https://compbio.engr.uconn.edu</url>
   </organization>
   <repositories>
   	<repository>
@@ -223,5 +223,5 @@
        		</plugin>
 		</plugins>
 	</build>
-  <url>https://github.com/arvestad/jprime/</url>
+  <url>https://github.com/soumyakundu/SaGePhy</url>
 </project>
