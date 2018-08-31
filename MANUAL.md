@@ -241,7 +241,7 @@ A file with a tree in Newick format is required; the user may alternatively pass
 
 * Constant [rate] : Constant rates (i.e., strict molecular clock).
 
-* IIDGamma [k] [$\theta$] : IID rates from Gamma(k, $\theta$).
+* IIDGamma [k] [\theta] : IID rates from Gamma(k, $\theta$).
 
 * IIDLogNormal [$\mu$] [$\sigma^2$] : IID rates from ln $N(\mu, \sigma^2)$.
 
