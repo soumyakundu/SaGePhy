@@ -15,12 +15,6 @@ import uc.sgp.sagephy.misc.Pair;
 import uc.sgp.sagephy.topology.RBTreeEpochDiscretiser;
 import uc.sgp.sagephy.topology.TopologyException;
 
-/**
- * Generator that simulates a guest tree in unpruned and pruned form, verifies
- * requirements, labels vertices, etc.
- * 
- * @author Joel Sjöstrand.
- */
 public class GuestTreeMachina {
 
 	private PRNG prng;
@@ -35,12 +29,12 @@ public class GuestTreeMachina {
 	private int attempts;
 	private boolean appendSigma;
 	private boolean isSpecies;
-	
+
 	/**
 	 * Constructor.
 	 * @param seed PRNG seed.
 	 * @param min min no of leaves.
-	 * @param max max no of leaves. 
+	 * @param max max no of leaves.
 	 * @param minper min leaves per host leaf.
 	 * @param maxper max leaves per host leaf.
 	 * @param leafSizes leaf sizes to sample from, unless null.
@@ -63,7 +57,7 @@ public class GuestTreeMachina {
 		this.appendSigma = appendSigma;
 		this.isSpecies = isSpecies;
 	}
-		
+
 	/**
 	 * Samples a host tree.
 	 * @param mightyGodPlaysDice unpruned tree creator.
@@ -73,7 +67,7 @@ public class GuestTreeMachina {
 	 * @throws MaxAttemptsException.
 	 */
 	public Pair<PrIMENewickTree,PrIMENewickTree> sampleGuestTree(UnprunedGuestTreeCreator mightyGodPlaysDice, DomainTreeGenParameters params) throws NewickIOException, TopologyException, MaxAttemptsException {
-		
+
 		this.attempts = 0;
 		List<Integer> hostLeaves = mightyGodPlaysDice.getHostLeaves();
 		GuestVertex unprunedRoot;
@@ -81,38 +75,38 @@ public class GuestTreeMachina {
 		if (leafSizes != null) {
 			exact = leafSizes.get(this.prng.nextInt(leafSizes.size()));
 		}
-		
+
 		GuestVertex prunedRoot = null;
-		
+
 		do {
 			do {
 				if (attempts > maxAttempts) {
 					throw new MaxAttemptsException("" + attempts + " reached.");
 				}
-				
+
 				// Generate unpruned trees until requirements are met.
 				if (attempts > maxAttempts) {
 					throw new MaxAttemptsException("" + attempts + " reached.");
 				}
-				
+
 				//System.out.println("Tree: " + attempts);
-				
+
 				unprunedRoot = mightyGodPlaysDice.createUnprunedTree(this.prng);
 				int no = PruningHelper.labelUnprunableVertices(unprunedRoot, 0, vertexPrefix, appendSigma);
 				PruningHelper.labelPrunableVertices(unprunedRoot, no, vertexPrefix, appendSigma);
 				attempts++;
 			} while (!unprunedIsOK(unprunedRoot, exact, hostLeaves, mightyGodPlaysDice, params));
-			
+
 			// Set meta info.
 			if (!this.excludeMeta) {
 				GuestVertex.setMeta(unprunedRoot, this.isSpecies);
 			}
-			
+
 			// Finally, an unpruned candidate tree.
 			prunedRoot = PruningHelper.prune(unprunedRoot);
 			attempts++;
 		} while (!prunedIsOK(prunedRoot));
-		
+
 		String treeMeta = (excludeMeta ? null : "[&&PRIME NAME=UnprunedTree]");
 		PrIMENewickTree unprunedTree = new PrIMENewickTree(new NewickTree(unprunedRoot, treeMeta, false, false), false);
 		treeMeta = (excludeMeta ? null : "[&&PRIME NAME=PrunedTree]");
@@ -130,7 +124,7 @@ public class GuestTreeMachina {
 	protected boolean unprunedIsOK(GuestVertex root, int exact, List<Integer> hostLeaves, UnprunedGuestTreeCreator mightyGodPlaysDice, DomainTreeGenParameters params) {
 		int sampledLeaves = 0;
 		LinkedList<NewickVertex> vertices = new LinkedList<NewickVertex>();
-		HashMap<Integer, Integer> sigmaCnt = new HashMap<Integer, Integer>(512); 
+		HashMap<Integer, Integer> sigmaCnt = new HashMap<Integer, Integer>(512);
 		if (root != null) {
 			vertices.add(root);
 		}
@@ -173,7 +167,7 @@ public class GuestTreeMachina {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Validates requirements of pruned tree.
 	 * @param root guest tree root.
@@ -183,7 +177,7 @@ public class GuestTreeMachina {
 		// TODO Auto-generated method stub
 		return true;
 	}
-	
+
 	/**
 	 * Returns the no. of attempts of the last simulation.
 	 * @return the number of tries.
@@ -191,5 +185,5 @@ public class GuestTreeMachina {
 	public int getAttempts() {
 		return this.attempts;
 	}
-	
+
 }

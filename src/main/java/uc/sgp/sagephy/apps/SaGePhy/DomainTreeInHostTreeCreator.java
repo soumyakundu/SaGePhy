@@ -24,22 +24,16 @@ import uc.sgp.sagephy.topology.RBTreeEpochDiscretiser;
 import uc.sgp.sagephy.topology.TimesMap;
 import uc.sgp.sagephy.topology.TopologyException;
 
-/**
- * Creates domain tree evolving over multiple gene trees and one species tree.
- *
- * @author Soumya Kundu
- */
-
 public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 	/** Species tree. */
 	private RBTreeEpochDiscretiser speciesTree;
-	
+
 	/** Species names. */
 	private NamesMap speciesNames;
-	
+
 	/** Guest trees. */
-	private ArrayList<RBTreeEpochDiscretiser> guestTrees = 
+	private ArrayList<RBTreeEpochDiscretiser> guestTrees =
 			new ArrayList<RBTreeEpochDiscretiser>();
 
 	/** Guest names. */
@@ -59,31 +53,31 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 	/** Transfer distance bias. */
 	private String distance_bias;
-	
+
 	private double distance_bias_rate;
-	
+
 	private boolean doDomainBirth;
-	
+
 	/** Gene birth sampling bias. */
 	private double domain_birth;
 
 	/** Host Tree or Guest Tree. */
 	private boolean isHost;
-	
+
 	/** Intra-gene transfer rate. */
 	private double inter_gene;
-	
+
 	/** Intra-species transfer rate. */
 	private double inter_species;
 
 	/** Sampling probability. */
 	private double rho;
-	
+
 	/** Domain tree root. */
 	private GuestVertex root;
-	
+
 	private HashMap<RBTreeEpochDiscretiser, Integer> used;
-	
+
 	/**
 	 * Constructor.
 	 * @param species species tree.
@@ -99,17 +93,17 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	 * @param inter_gene inter-gene transfer probability.
 	 * @param inter_species inter-species transfer probability.
 	 * @param rho probability of sampling leaf.
-	 * @param stem 
+	 * @param stem
 	 * @throws TopologyException.
 	 * @throws NewickIOException.
 	 */
 
-	public DomainTreeInHostTreeCreator(PrIMENewickTree species, 
-			ArrayList<PrIMENewickTree> guests, double lambda, double mu, 
-			double tau, double theta, String distance_bias, 
-			double distance_bias_rate, boolean doDomainBirth, 
-			double domain_birth, boolean isHost, double inter_gene, 
-			double inter_species, double rho, Double stem) 
+	public DomainTreeInHostTreeCreator(PrIMENewickTree species,
+			ArrayList<PrIMENewickTree> guests, double lambda, double mu,
+			double tau, double theta, String distance_bias,
+			double distance_bias_rate, boolean doDomainBirth,
+			double domain_birth, boolean isHost, double inter_gene,
+			double inter_species, double rho, Double stem)
 				throws TopologyException, NewickIOException {
 
 		// Species tree.
@@ -123,7 +117,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			speciesTimes.getArcTimes()[H.getRoot()] = 1.0e-64;
 		}
 		this.speciesTree = new RBTreeEpochDiscretiser(H, speciesNames, speciesTimes);
-		
+
 		// Gene trees.
 		for (int i = 0; i < guests.size(); i++) {
 			RBTree S = new RBTree(guests.get(i), guests.get(i).getTreeName());
@@ -134,8 +128,8 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			}
 			this.guestTrees.add(new RBTreeEpochDiscretiser(S, guestNames.get(i), guestTimes));
 		}
-		
-		// generate epoch and arc id information for each edge of the species 
+
+		// generate epoch and arc id information for each edge of the species
 		// tree. this is useful when doing sampling realization from DLTRS model.
 
 		// Parameters.
@@ -171,32 +165,32 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 		GuestVertex root;
 		int myRoot;
-		
+
 		int first_guest = prng.nextInt(guestTrees.size());
 
 		this.used = new HashMap<RBTreeEpochDiscretiser, Integer>();
 		for (RBTreeEpochDiscretiser k : guestTrees) {
 			used.put(k, 0);
 		}
-		
+
 		// Single lineage at tip.
 		if (this.isHost == true) {
 			myRoot = guestTrees.get(first_guest).getRoot();
-			root = this.createGuestVertex(myRoot, 
-					guestTrees.get(first_guest).getTipToLeafTime(), prng, 
+			root = this.createGuestVertex(myRoot,
+					guestTrees.get(first_guest).getTipToLeafTime(), prng,
 					guestTrees.get(first_guest));
 		} else if (this.doDomainBirth != false) {
 			myRoot = guestTrees.get(first_guest).sampleRoot(prng, this.domain_birth);
-			root = this.createGuestVertex(myRoot, 
-					guestTrees.get(first_guest).getVertexUpperTime(myRoot), 
+			root = this.createGuestVertex(myRoot,
+					guestTrees.get(first_guest).getVertexUpperTime(myRoot),
 					prng, guestTrees.get(first_guest));
 		} else {
 			myRoot = guestTrees.get(first_guest).getRoot();
-			root = this.createGuestVertex(myRoot, 
-					guestTrees.get(first_guest).getTipToLeafTime(), prng, 
+			root = this.createGuestVertex(myRoot,
+					guestTrees.get(first_guest).getTipToLeafTime(), prng,
 					guestTrees.get(first_guest));
 		}
-		
+
 		//System.out.println("Root: " + myRoot);
 		alive.add(root);
 		this.root = root;
@@ -219,25 +213,25 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			GuestVertex rc = null;
 
 			if (lin.event == Event.SPECIATION) {
-				lc = this.createGuestVertex(lin.guestTree.getLeftChild(lin.sigma), 
+				lc = this.createGuestVertex(lin.guestTree.getLeftChild(lin.sigma),
 						lin.abstime, prng, lin.guestTree);
-				rc = this.createGuestVertex(lin.guestTree.getRightChild(lin.sigma), 
+				rc = this.createGuestVertex(lin.guestTree.getRightChild(lin.sigma),
 						lin.abstime, prng, lin.guestTree);
 
 			//--------------------------------------------------------------//
-				
+
 			} else if (lin.event == Event.DUPLICATION) {
 				lc = this.createGuestVertex(lin.sigma, lin.abstime, prng, lin.guestTree);
 				rc = this.createGuestVertex(lin.sigma, lin.abstime, prng, lin.guestTree);
 
 			//--------------------------------------------------------------//
-				
+
 			} else if (lin.event == Event.ADDITIVE_TRANSFER_INTRAGENE_INTRASPECIES) {
 				if (prng.nextDouble() < 0.5) {
 					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma,
 							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime,
-							this.distance_bias, this.distance_bias_rate, null, 
-							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), 
+							this.distance_bias, this.distance_bias_rate, null,
+							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(),
 							true);
 					if (transferedToArc == -5) {
 						Pair<GuestVertex, GuestVertex> swapped = swap(lin, lc, prng);
@@ -251,12 +245,12 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						lin.setTransferedFromGuest(lin.getGuestTree());
 						lin.setTransferedToGuest(rc.getGuestTree());
 					}
-						
+
 				} else {
 					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma,
-							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, 
-							this.distance_bias, this.distance_bias_rate, null, 
-							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), 
+							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime,
+							this.distance_bias, this.distance_bias_rate, null,
+							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(),
 							true);
 					if (transferedToArc == -5) {
 						Pair<GuestVertex, GuestVertex> swapped = swap(lin, rc, prng);
@@ -271,15 +265,15 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						lin.setTransferedToGuest(lc.getGuestTree());
 					}
 				}
-				
+
 			//--------------------------------------------------------------//
-				
+
 			} else if (lin.event == Event.ADDITIVE_TRANSFER_INTRAGENE_INTERSPECIES) {
 				if (prng.nextDouble() < 0.5) {
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, 
-							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, 
-							this.distance_bias, this.distance_bias_rate, null, 
-							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), 
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma,
+							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime,
+							this.distance_bias, this.distance_bias_rate, null,
+							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(),
 							false);
 					if (transferedToArc == -5) {
 						Pair<GuestVertex, GuestVertex> swapped = swap(lin, lc, prng);
@@ -295,10 +289,10 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 					}
 
 				} else {
-					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma, 
-							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, 
-							this.distance_bias, this.distance_bias_rate, null, 
-							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), 
+					int transferedToArc= lin.epoch.sampleArc(prng, lin.sigma,
+							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime,
+							this.distance_bias, this.distance_bias_rate, null,
+							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(),
 							false);
 					if (transferedToArc == -5) {
 						Pair<GuestVertex, GuestVertex> swapped = swap(lin, rc, prng);
@@ -313,9 +307,9 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						lin.setTransferedToGuest(lc.getGuestTree());
 					}
 				}
-				
+
 			//--------------------------------------------------------------//
-				
+
 			} else if (lin.event == Event.ADDITIVE_TRANSFER_INTERGENE_INTRASPECIES) {
 				if (prng.nextDouble() < 0.5) {
 					Pair<Integer, RBTreeEpochDiscretiser> igtransfer = this.sampleInterGeneArc(lin, true, null, prng);
@@ -332,7 +326,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						lin.setTransferedFromGuest(lin.getGuestTree());
 						lin.setTransferedToGuest(rc.getGuestTree());
 					}
-						
+
 				} else {
 					Pair<Integer, RBTreeEpochDiscretiser> igtransfer = this.sampleInterGeneArc(lin, true, null, prng);
 					int transferedToArc = igtransfer.first;
@@ -349,9 +343,9 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						lin.setTransferedToGuest(lc.getGuestTree());
 					}
 				}
-				
+
 			//--------------------------------------------------------------//
-				
+
 			} else if (lin.event == Event.ADDITIVE_TRANSFER_INTERGENE_INTERSPECIES) {
 				if (prng.nextDouble() < 0.5) {
 					Pair<Integer, RBTreeEpochDiscretiser> igtransfer = this.sampleInterGeneArc(lin, false, null, prng);
@@ -387,13 +381,13 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 				}
 
 			//--------------------------------------------------------------//
-				
+
 			} else if (lin.event == Event.REPLACING_TRANSFER_INTRAGENE_INTRASPECIES) {
 				if (prng.nextDouble() < 0.5) {
-					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, 
-							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, 
-							this.distance_bias, this.distance_bias_rate, null, 
-							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), 
+					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma,
+							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime,
+							this.distance_bias, this.distance_bias_rate, null,
+							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(),
 							true);
 					if (transferedToArc == -5) {
 						Pair<GuestVertex, GuestVertex> swapped = swap(lin, lc, prng);
@@ -407,7 +401,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						GuestVertex node = findVertex(this.root, lin, lin.guestTree);
 						ArrayList<Integer> emptyArcs = new ArrayList<Integer>();
 
-						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) 
+						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)
 								&& lin.transferedToArc != -5) {
 
 							if (!emptyArcs.contains(lin.transferedToArc)) {
@@ -415,10 +409,10 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							}
 
 							if (emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)) {
-								lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, 
-										lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, 
-										this.distance_bias, this.distance_bias_rate, emptyArcs, 
-										lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), 
+								lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma,
+										lin.epoch.findIndexOfArc(lin.sigma), lin.abstime,
+										this.distance_bias, this.distance_bias_rate, emptyArcs,
+										lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(),
 										true);
 								node = findVertex(this.root, lin, lin.guestTree);
 							}
@@ -446,17 +440,17 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							lin.epoch.setTransferedToArc(transferedToArc);
 							lin.setTransferedFromGuest(lin.getGuestTree());
 							lin.setTransferedToGuest(rc.getGuestTree());
-							//System.out.println("Could not replace from - Tree: " + 
-							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma + 
+							//System.out.println("Could not replace from - Tree: " +
+							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma +
 							//		" at " + lin.abstime);
 						}
 					}
 
 				} else {
-					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, 
-							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, 
-							this.distance_bias, this.distance_bias_rate, null, 
-							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), 
+					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma,
+							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime,
+							this.distance_bias, this.distance_bias_rate, null,
+							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(),
 							true);
 					if (transferedToArc == -5) {
 						Pair<GuestVertex, GuestVertex> swapped = swap(lin, rc, prng);
@@ -470,7 +464,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						GuestVertex node = findVertex(this.root, lin, lin.guestTree);
 						ArrayList<Integer> emptyArcs = new ArrayList<Integer>();
 
-						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) && 
+						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) &&
 								lin.transferedToArc != -5) {
 
 							if (!emptyArcs.contains(lin.transferedToArc)) {
@@ -478,10 +472,10 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							}
 
 							if (emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)) {
-								lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, 
-										lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, 
-										this.distance_bias, this.distance_bias_rate, emptyArcs, 
-										lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), 
+								lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma,
+										lin.epoch.findIndexOfArc(lin.sigma), lin.abstime,
+										this.distance_bias, this.distance_bias_rate, emptyArcs,
+										lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(),
 										true);
 								node = findVertex(this.root, lin, lin.guestTree);
 							}
@@ -509,21 +503,21 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							lin.epoch.setTransferedToArc(transferedToArc);
 							lin.setTransferedFromGuest(lin.getGuestTree());
 							lin.setTransferedToGuest(lc.getGuestTree());
-							//System.out.println("Could not replace from - Tree: " + 
-							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma + 
+							//System.out.println("Could not replace from - Tree: " +
+							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma +
 							//		" at " + lin.abstime);
 						}
 					}
 				}
-				
+
 			//--------------------------------------------------------------//
-				
+
 			} else if (lin.event == Event.REPLACING_TRANSFER_INTRAGENE_INTERSPECIES) {
 				if (prng.nextDouble() < 0.5) {
-					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, 
-							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, 
-							this.distance_bias, this.distance_bias_rate, null, 
-							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), 
+					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma,
+							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime,
+							this.distance_bias, this.distance_bias_rate, null,
+							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(),
 							false);
 					if (transferedToArc == -5) {
 						Pair<GuestVertex, GuestVertex> swapped = swap(lin, lc, prng);
@@ -537,7 +531,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						GuestVertex node = findVertex(this.root, lin, lin.guestTree);
 						ArrayList<Integer> emptyArcs = new ArrayList<Integer>();
 
-						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) 
+						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)
 								&& lin.transferedToArc != -5) {
 
 							if (!emptyArcs.contains(lin.transferedToArc)) {
@@ -545,10 +539,10 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							}
 
 							if (emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)) {
-								lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, 
-										lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, 
-										this.distance_bias, this.distance_bias_rate, emptyArcs, 
-										lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), 
+								lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma,
+										lin.epoch.findIndexOfArc(lin.sigma), lin.abstime,
+										this.distance_bias, this.distance_bias_rate, emptyArcs,
+										lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(),
 										false);
 								node = findVertex(this.root, lin, lin.guestTree);
 							}
@@ -576,17 +570,17 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							lin.epoch.setTransferedToArc(transferedToArc);
 							lin.setTransferedFromGuest(lin.getGuestTree());
 							lin.setTransferedToGuest(rc.getGuestTree());
-							//System.out.println("Could not replace from - Tree: " + 
-							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma + 
+							//System.out.println("Could not replace from - Tree: " +
+							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma +
 							//		" at " + lin.abstime);
 						}
 					}
 
 				} else {
-					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, 
-							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, 
-							this.distance_bias, this.distance_bias_rate, null, 
-							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), 
+					int transferedToArc = lin.epoch.sampleArc(prng, lin.sigma,
+							lin.epoch.findIndexOfArc(lin.sigma), lin.abstime,
+							this.distance_bias, this.distance_bias_rate, null,
+							lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(),
 							false);
 					if (transferedToArc == -5) {
 						Pair<GuestVertex, GuestVertex> swapped = swap(lin, rc, prng);
@@ -600,7 +594,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						GuestVertex node = findVertex(this.root, lin, lin.guestTree);
 						ArrayList<Integer> emptyArcs = new ArrayList<Integer>();
 
-						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) && 
+						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) &&
 								lin.transferedToArc != -5) {
 
 							if (!emptyArcs.contains(lin.transferedToArc)) {
@@ -608,10 +602,10 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							}
 
 							if (emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1)) {
-								lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma, 
-										lin.epoch.findIndexOfArc(lin.sigma), lin.abstime, 
-										this.distance_bias, this.distance_bias_rate, emptyArcs, 
-										lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(), 
+								lin.transferedToArc = lin.epoch.sampleArc(prng, lin.sigma,
+										lin.epoch.findIndexOfArc(lin.sigma), lin.abstime,
+										this.distance_bias, this.distance_bias_rate, emptyArcs,
+										lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex(),
 										false);
 								node = findVertex(this.root, lin, lin.guestTree);
 							}
@@ -639,15 +633,15 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							lin.epoch.setTransferedToArc(transferedToArc);
 							lin.setTransferedFromGuest(lin.getGuestTree());
 							lin.setTransferedToGuest(lc.getGuestTree());
-							//System.out.println("Could not replace from - Tree: " + 
-							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma + 
+							//System.out.println("Could not replace from - Tree: " +
+							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma +
 							//		" at " + lin.abstime);
 						}
 					}
 				}
-				
+
 			//--------------------------------------------------------------//
-								
+
 			} else if (lin.event == Event.REPLACING_TRANSFER_INTERGENE_INTRASPECIES) {
 				if (prng.nextDouble() < 0.5) {
 					Pair<Integer, RBTreeEpochDiscretiser> igtransfer = this.sampleInterGeneArc(lin, true, null, prng);
@@ -665,7 +659,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						GuestVertex node = findVertex(this.root, lin, igtransfer.second);
 						ArrayList<Integer> emptyArcs = new ArrayList<Integer>();
 
-						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) && 
+						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) &&
 								lin.transferedToArc != -5) {
 
 							if (!emptyArcs.contains(lin.transferedToArc)) {
@@ -693,7 +687,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							node.setChildren(null);
 							lin.setTransferedFromGuest(lin.getGuestTree());
 							lin.setTransferedToGuest(rc.getGuestTree());
-							
+
 
 						} else {
 							rc = this.createGuestVertex(transferedToArc, lin.abstime, prng, orig_gene);
@@ -702,8 +696,8 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							lin.epoch.setTransferedToArc(transferedToArc);
 							lin.setTransferedFromGuest(lin.getGuestTree());
 							lin.setTransferedToGuest(rc.getGuestTree());
-							//System.out.println("Could not replace from - Tree: " + 
-							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma + 
+							//System.out.println("Could not replace from - Tree: " +
+							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma +
 							//		" at " + lin.abstime);
 						}
 					}
@@ -724,7 +718,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						GuestVertex node = findVertex(this.root, lin, igtransfer.second);
 						ArrayList<Integer> emptyArcs = new ArrayList<Integer>();
 
-						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) && 
+						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) &&
 								lin.transferedToArc != -5) {
 
 							if (!emptyArcs.contains(lin.transferedToArc)) {
@@ -760,15 +754,15 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							lin.epoch.setTransferedToArc(transferedToArc);
 							lin.setTransferedFromGuest(lin.getGuestTree());
 							lin.setTransferedToGuest(lc.getGuestTree());
-							//System.out.println("Could not replace from - Tree: " + 
-							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma + 
+							//System.out.println("Could not replace from - Tree: " +
+							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma +
 							//		" at " + lin.abstime);
 						}
 					}
 				}
-				
+
 			//--------------------------------------------------------------//
-				
+
 			} else if (lin.event == Event.REPLACING_TRANSFER_INTERGENE_INTERSPECIES) {
 				if (prng.nextDouble() < 0.5) {
 					Pair<Integer, RBTreeEpochDiscretiser> igtransfer = this.sampleInterGeneArc(lin, false, null, prng);
@@ -786,7 +780,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						GuestVertex node = findVertex(this.root, lin, igtransfer.second);
 						ArrayList<Integer> emptyArcs = new ArrayList<Integer>();
 
-						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) && 
+						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) &&
 								lin.transferedToArc != -5) {
 
 							if (!emptyArcs.contains(lin.transferedToArc)) {
@@ -814,7 +808,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							node.setChildren(null);
 							lin.setTransferedFromGuest(lin.getGuestTree());
 							lin.setTransferedToGuest(rc.getGuestTree());
-							
+
 
 						} else {
 							rc = this.createGuestVertex(transferedToArc, lin.abstime, prng, orig_gene);
@@ -823,8 +817,8 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							lin.epoch.setTransferedToArc(transferedToArc);
 							lin.setTransferedFromGuest(lin.getGuestTree());
 							lin.setTransferedToGuest(rc.getGuestTree());
-							//System.out.println("Could not replace from - Tree: " + 
-							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma + 
+							//System.out.println("Could not replace from - Tree: " +
+							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma +
 							//		" at " + lin.abstime);
 						}
 					}
@@ -845,7 +839,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 						GuestVertex node = findVertex(this.root, lin, igtransfer.second);
 						ArrayList<Integer> emptyArcs = new ArrayList<Integer>();
 
-						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) && 
+						while (node == null && emptyArcs.size() != (lin.epoch.getNoOfArcs() - 1) &&
 								lin.transferedToArc != -5) {
 
 							if (!emptyArcs.contains(lin.transferedToArc)) {
@@ -881,13 +875,13 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 							lin.epoch.setTransferedToArc(transferedToArc);
 							lin.setTransferedFromGuest(lin.getGuestTree());
 							lin.setTransferedToGuest(lc.getGuestTree());
-							//System.out.println("Could not replace from - Tree: " + 
-							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma + 
+							//System.out.println("Could not replace from - Tree: " +
+							//		lin.guestTreeIndex + ", Lineage: " + lin.sigma +
 							//		" at " + lin.abstime);
 						}
 					}
 				}
-				
+
 			//--------------------------------------------------------------//
 
 			} else {
@@ -904,11 +898,11 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			} else {
 				//System.out.println("Null Lineage -------- Null Lineage");
 			}
-				
+
 			if (lc != null) {
-				if (lc.event != Event.REPLACING_TRANSFER_INTRAGENE_INTRASPECIES && 
-					lc.event != Event.REPLACING_TRANSFER_INTRAGENE_INTERSPECIES && 
-					lc.event != Event.REPLACING_TRANSFER_INTERGENE_INTRASPECIES && 
+				if (lc.event != Event.REPLACING_TRANSFER_INTRAGENE_INTRASPECIES &&
+					lc.event != Event.REPLACING_TRANSFER_INTRAGENE_INTERSPECIES &&
+					lc.event != Event.REPLACING_TRANSFER_INTERGENE_INTRASPECIES &&
 					lc.event != Event.REPLACING_TRANSFER_INTERGENE_INTERSPECIES) {
 					alive.add(lc);
 				} else {
@@ -917,9 +911,9 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			}
 
 			if (rc != null) {
-				if (rc.event != Event.REPLACING_TRANSFER_INTRAGENE_INTRASPECIES && 
+				if (rc.event != Event.REPLACING_TRANSFER_INTRAGENE_INTRASPECIES &&
 					rc.event != Event.REPLACING_TRANSFER_INTRAGENE_INTERSPECIES &&
-					rc.event != Event.REPLACING_TRANSFER_INTERGENE_INTRASPECIES && 
+					rc.event != Event.REPLACING_TRANSFER_INTERGENE_INTRASPECIES &&
 					rc.event != Event.REPLACING_TRANSFER_INTERGENE_INTERSPECIES) {
 					alive.add(rc);
 				} else {
@@ -953,8 +947,8 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	//Finds a given vertex in a given tree.
 	public GuestVertex findVertex(GuestVertex node, GuestVertex x, RBTreeEpochDiscretiser guestTree) {
 		if (node != null) {
-			if (node.sigma == x.getTransferedToArc() && node.guestTree == guestTree && 
-					node != x.getRightChild() && node != x.getLeftChild() && 
+			if (node.sigma == x.getTransferedToArc() && node.guestTree == guestTree &&
+					node != x.getRightChild() && node != x.getLeftChild() &&
 					node.abstime < x.abstime && (node.abstime + node.getBranchLength()) > x.abstime) {
 				return node;
 			} else {
@@ -985,7 +979,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			return false;
 		}
 	}
-	
+
 	//Replaces parent vertex with child vertex.
 	public Pair<GuestVertex, GuestVertex> swap(GuestVertex lin, GuestVertex child, PRNG prng) {
 		child = this.createGuestVertex(lin.sigma, lin.abstime + lin.branchtime, prng, lin.guestTree);
@@ -1006,11 +1000,11 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		Pair<GuestVertex, GuestVertex> swapped = new Pair<GuestVertex, GuestVertex>(lin, child);
 		return swapped;
 	}
-	
-	public Pair<Integer, RBTreeEpochDiscretiser> sampleInterGeneArc(GuestVertex lin, 
+
+	public Pair<Integer, RBTreeEpochDiscretiser> sampleInterGeneArc(GuestVertex lin,
 			Boolean intraSpecies, ArrayList<Integer> emptyArcs, PRNG prng) throws NewickIOException{
 		ArrayList<RBTreeEpochDiscretiser> otherTrees = new ArrayList<RBTreeEpochDiscretiser>();
-		ArrayList<Pair<Integer, RBTreeEpochDiscretiser>> candidates = 
+		ArrayList<Pair<Integer, RBTreeEpochDiscretiser>> candidates =
 				new ArrayList<Pair<Integer, RBTreeEpochDiscretiser>>();
 		for (RBTreeEpochDiscretiser tree : this.guestTrees) {
 			if (tree != lin.guestTree) {
@@ -1022,8 +1016,8 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			for (int i = 0; i < k; i++) {
 				int arcHost = tree.getRBTree().getNewickTree().getVertex(i).getHostVertex();
 				int hostArc = lin.guestTree.getRBTree().getNewickTree().getVertex(lin.sigma).getHostVertex();
-				if (i != lin.sigma && ((emptyArcs == null) ? true : !emptyArcs.contains(i)) && 
-					tree.getVertexTime(i) < lin.abstime && tree.getVertexUpperTime(i) > lin.abstime && 
+				if (i != lin.sigma && ((emptyArcs == null) ? true : !emptyArcs.contains(i)) &&
+					tree.getVertexTime(i) < lin.abstime && tree.getVertexUpperTime(i) > lin.abstime &&
 					((intraSpecies) ? (arcHost == hostArc) : (arcHost != hostArc))) {
 					candidates.add(new Pair<Integer, RBTreeEpochDiscretiser>(i, tree));
 				}
@@ -1309,7 +1303,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	public String getHost() {
 		return this.speciesTree.toString();
 	}
-	
+
 	@Override
 	public HashMap<RBTreeEpochDiscretiser, Integer> getUsed() {
 		return this.used;

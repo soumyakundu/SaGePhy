@@ -23,13 +23,6 @@ import uc.sgp.sagephy.topology.RBTreeEpochDiscretiser;
 import uc.sgp.sagephy.topology.TimesMap;
 import uc.sgp.sagephy.topology.TopologyException;
 
-/**
- * Creates unpruned trees evolving over a host tree.
- *
- * @author Joel Sjöstrand.
- * @author Mehmood Alam Khan
- */
-
 public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 	/** Host tree. */
@@ -52,11 +45,11 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 	/** Transfer distance bias. */
 	private String distance_bias;
-	
+
 	private double distance_bias_rate;
-	
+
 	private Boolean doGeneBirth;
-	
+
 	/** Gene birth sampling bias. */
 	private double gene_birth;
 
@@ -65,7 +58,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 	/** Sampling probability. */
 	private double rho;
-	
+
 	/**
 	 * Constructor.
 	 * @param host host tree.
@@ -151,9 +144,9 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			//System.out.println("-------------------------");
 
 			GuestVertex lin = alive.pop();
-			
+
 			//System.out.println("Host: " + lin.getHostVertex());
-			
+
 			if (lin.event == Event.LOSS || lin.event == Event.REPLACING_LOSS || lin.event == Event.LEAF || lin.event == Event.UNSAMPLED_LEAF) {
 				// Lineage ends.
 				if (alive.isEmpty()) {
@@ -569,7 +562,7 @@ public class GuestTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 	public String getHost() {
 		return this.hostTree.toString();
 	}
-	
+
 	@Override
 	public HashMap<RBTreeEpochDiscretiser, Integer> getUsed() {
 		return null;
