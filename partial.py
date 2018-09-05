@@ -31,7 +31,7 @@ def get_args(argv):
     parser.add_argument("-gl", "--gene-length", default="1000", help="Length of gene sequences [default = 1000].")
     parser.add_argument("-ap", "--append-domain", help="Append domain sequences to gene sequences instead of random insertion.", action="store_true")
     parser.add_argument("-s", "--branch-scaling", default="1.0", help="Branch length scaling factor [default = 1.0].")
-    parser.add_argument("-m", "--model", default="GTR", help="HKY, F84, GTR, JTT, WAG, PAM, BLOSUM, MTREV, CPREV45, MTART, LG, GENERAL" + "\n" + " HKY, F84 & GTR are for nucleotides the rest are for amino acids [default = GTR].")
+    parser.add_argument("-m", "--model", default="GTR", help="HKY, F84, GTR, JTT, WAG, PAM, BLOSUM, MTREV, CPREV45, MTART, LG, and GENERAL. HKY, F84 and GTR are for nucleotides, while the rest are for amino acids [default = GTR].")
     parser.add_argument("-a", "--alpha", default="1.0", help="Shape (alpha) for gamma rate heterogeneity [default = 1.0].")
     parser.add_argument("-g", "--gamma-cats", help="Number of gamma rate categories [default = continuous].")
     parser.add_argument("-i", "--invariable-sites", default="0.0", help="Proportion of invariable sites [default = 0.0].")
