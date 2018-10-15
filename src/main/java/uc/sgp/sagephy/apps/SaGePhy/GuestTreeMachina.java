@@ -107,9 +107,9 @@ public class GuestTreeMachina {
 			attempts++;
 		} while (!prunedIsOK(prunedRoot));
 
-		String treeMeta = (excludeMeta ? null : "[&&PRIME NAME=UnprunedTree]");
+		String treeMeta = (excludeMeta ? null : "[NAME=UnprunedTree]");
 		PrIMENewickTree unprunedTree = new PrIMENewickTree(new NewickTree(unprunedRoot, treeMeta, false, false), false);
-		treeMeta = (excludeMeta ? null : "[&&PRIME NAME=PrunedTree]");
+		treeMeta = (excludeMeta ? null : "[NAME=PrunedTree]");
 		PrIMENewickTree prunedTree = (prunedRoot == null ? null : new PrIMENewickTree(new NewickTree(prunedRoot, treeMeta, false, false), false));
 		return new Pair<PrIMENewickTree, PrIMENewickTree>(prunedTree, unprunedTree);
 	}

@@ -10,6 +10,7 @@ public class GuestVertex extends NewickVertex {
 	/** Event types. */
 	public enum Event {
 		SPECIATION,
+        CO-DIVERGENCE,
 		LEAF,             // Sampled leaf.
 		UNSAMPLED_LEAF,   // Unsampled leaf.
 		DUPLICATION,
@@ -185,7 +186,6 @@ public class GuestVertex extends NewickVertex {
 		while (!vertices.isEmpty()) {
 			GuestVertex v = (GuestVertex) vertices.pop();
 			StringBuilder sb = new StringBuilder(1024);
-			//sb.append("[&&PRIME");
 			sb.append("[ID=").append(v.getNumber());
 			if (!isSpecies) {
 				sb.append(" HOST=").append(v.getHostVertex());
@@ -383,6 +383,18 @@ public class GuestVertex extends NewickVertex {
 				String disctpt= "DISCPT=(" + v.epoch.getNo() + "," + k +")";
 				sb.append(" VERTEXTYPE=Speciation"+ " "+ disctpt);
 				break;
+            case CO-DIVERGENCE:
+                double [] disctTimes= v.epoch.getTimes();
+                int k=0;
+                while (true && k < disctTimes.length){
+                    if (disctTimes[k] >= v.abstime){
+                        break;
+                    }
+                    ++k;
+                }
+                String disctpt= "DISCPT=(" + v.epoch.getNo() + "," + k +")";
+                sb.append(" VERTEXTYPE=Co-divergence"+ " "+ disctpt);
+                break;
 			case LEAF:
 				sb.append(" VERTEXTYPE=Leaf");
 				break;

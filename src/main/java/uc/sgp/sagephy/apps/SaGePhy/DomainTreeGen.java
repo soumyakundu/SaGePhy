@@ -60,7 +60,7 @@ public class DomainTreeGen implements SaGePhyApp {
 				if (params.excludeMeta) {
 					System.out.println(guestTree.first == null ? ";" : NewickTreeWriter.write(guestTree.first));
 				} else {
-					System.out.println(guestTree.first == null ? "[&&PRIME NAME=PrunedTree];" : NewickTreeWriter.write(guestTree.first));
+					System.out.println(guestTree.first == null ? "[NAME=PrunedTree];" : NewickTreeWriter.write(guestTree.first));
 				}
 			} else {
 				BufferedWriter out = params.getOutputFile(".unpruned.tree");
@@ -70,7 +70,7 @@ public class DomainTreeGen implements SaGePhyApp {
 				if (params.excludeMeta) {
 					out.write(guestTree.first == null ? ";\n" : NewickTreeWriter.write(guestTree.first) + '\n');
 				} else {
-					out.write(guestTree.first == null ? "[&&PRIME NAME=PrunedTree];\n" : NewickTreeWriter.write(guestTree.first) + '\n');
+					out.write(guestTree.first == null ? "[NAME=PrunedTree];\n" : NewickTreeWriter.write(guestTree.first) + '\n');
 				}
 				out.close();
 				out = params.getOutputFile(".unpruned.info");

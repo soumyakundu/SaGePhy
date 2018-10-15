@@ -212,7 +212,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			GuestVertex lc = null;
 			GuestVertex rc = null;
 
-			if (lin.event == Event.SPECIATION) {
+			if (lin.event == Event.CO-DIVERGENCE) {
 				lc = this.createGuestVertex(lin.guestTree.getLeftChild(lin.sigma),
 						lin.abstime, prng, lin.guestTree);
 				rc = this.createGuestVertex(lin.guestTree.getRightChild(lin.sigma),
@@ -1050,13 +1050,13 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 		GuestVertex.Event event;
 		Epoch epoch;
 		if (eventTime <= lowerTime) {
-			// LEAF OR SPECIATION.
+			// LEAF OR CO-DIVERGENCE.
 			eventTime = lowerTime;
 			branchTime = NumberManipulation.roundToSignificantFigures(startTime - eventTime, 8);
 			if (guestTree.isLeaf(X)) {
 				event = (prng.nextDouble() < this.rho ? GuestVertex.Event.LEAF : GuestVertex.Event.UNSAMPLED_LEAF);
 			} else {
-				event = GuestVertex.Event.SPECIATION;
+				event = GuestVertex.Event.CO-DIVERGENCE;
 			}
 			epoch = guestTree.getEpochAbove(X);
 		} else {
@@ -1194,7 +1194,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			case REPLACING_TRANSFER_INTERGENE_INTERSPECIES:
 				noOfReplacing_Trans_Intergene_Interspecies++;
 				break;
-			case SPECIATION:
+			case CO-DIVERGENCE:
 				noOfSpecs++;
 				break;
 			case LEAF:
@@ -1210,7 +1210,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 		sb.append("No. of vertices:\t").append(noOfVertices).append('\n');
 		sb.append("No. of extant leaves:\t").append(noOfLeaves).append('\n');
-		sb.append("No. of speciations:\t").append(noOfSpecs).append('\n');
+		sb.append("No. of co-divergences:\t").append(noOfSpecs).append('\n');
 		sb.append("No. of duplications:\t").append(noOfDups).append('\n');
 		sb.append("No. of losses:\t").append(noOfLosses).append('\n');
 		sb.append("No. of replacing losses:\t").append(noOfReplacing_Losses).append('\n');

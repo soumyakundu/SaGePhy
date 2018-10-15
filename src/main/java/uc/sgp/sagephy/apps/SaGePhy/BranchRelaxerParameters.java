@@ -149,7 +149,7 @@ public class BranchRelaxerParameters {
 				"                                       branch passes over. The scale factor is then\n" +
 				"                                       applied to all relaxed lengths. Parameters are\n" +
 				"                                       stored in the host tree thus:\n" +
-				"                                       (A:0.4[&&PRIME PARAMS=(<k>,<theta>)],...\n" +
+				"                                       (A:0.4[PARAMS=(<k>,<theta>)],...\n" +
 				"                                       Guest and host tree must be temporally compatible\n" +
 				"                                       and have no lateral transfer events.\n" +
 				"                                       "
