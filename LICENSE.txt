@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 -------------------- CITATION --------------------
 
-"SaGePhy: An improved phylogenetic simulation framework for gene and sub-gene evolution
+"SaGePhy: An improved phylogenetic simulation framework for gene and subgene evolution
 Soumya Kundu and Mukul S. Bansal
 Available from https://compbio.engr.uconn.edu/software/sagephy/
 Manuscript under review." 

@@ -78,7 +78,7 @@ def run_seqgen(treedir, tree, dirtype, seqlen, args):
 
     outfile = open("seqs" + os.path.sep + dirtype + os.path.sep + (("pre_transfer" + os.path.sep) if dirtype == "genes" else ("")) + tree, "w")
 
-    call_list = ["./seq-gen", "-l", seqlen, "-s", args.branch_scaling, "-m", args.model, "-a", args.alpha, "-i", args.invariable_sites, "-of"]
+    call_list = ["seq-gen", "-l", seqlen, "-s", args.branch_scaling, "-m", args.model, "-a", args.alpha, "-i", args.invariable_sites, "-of"]
 
     if args.gamma_cats != None:
         call_list.append("-g")
