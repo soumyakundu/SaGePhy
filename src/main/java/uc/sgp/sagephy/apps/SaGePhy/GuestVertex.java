@@ -10,7 +10,7 @@ public class GuestVertex extends NewickVertex {
 	/** Event types. */
 	public enum Event {
 		SPECIATION,
-        CO-DIVERGENCE,
+        CODIVERGENCE,
 		LEAF,             // Sampled leaf.
 		UNSAMPLED_LEAF,   // Unsampled leaf.
 		DUPLICATION,
@@ -383,7 +383,7 @@ public class GuestVertex extends NewickVertex {
 				String disctpt= "DISCPT=(" + v.epoch.getNo() + "," + k +")";
 				sb.append(" VERTEXTYPE=Speciation"+ " "+ disctpt);
 				break;
-            case CO-DIVERGENCE:
+            case CODIVERGENCE:
                 double [] disctTimes= v.epoch.getTimes();
                 int k=0;
                 while (true && k < disctTimes.length){

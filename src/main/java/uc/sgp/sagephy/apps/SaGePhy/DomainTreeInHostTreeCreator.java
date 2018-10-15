@@ -212,7 +212,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			GuestVertex lc = null;
 			GuestVertex rc = null;
 
-			if (lin.event == Event.CO-DIVERGENCE) {
+			if (lin.event == Event.CODIVERGENCE) {
 				lc = this.createGuestVertex(lin.guestTree.getLeftChild(lin.sigma),
 						lin.abstime, prng, lin.guestTree);
 				rc = this.createGuestVertex(lin.guestTree.getRightChild(lin.sigma),
@@ -1056,7 +1056,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			if (guestTree.isLeaf(X)) {
 				event = (prng.nextDouble() < this.rho ? GuestVertex.Event.LEAF : GuestVertex.Event.UNSAMPLED_LEAF);
 			} else {
-				event = GuestVertex.Event.CO-DIVERGENCE;
+				event = GuestVertex.Event.CODIVERGENCE;
 			}
 			epoch = guestTree.getEpochAbove(X);
 		} else {
@@ -1194,7 +1194,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 			case REPLACING_TRANSFER_INTERGENE_INTERSPECIES:
 				noOfReplacing_Trans_Intergene_Interspecies++;
 				break;
-			case CO-DIVERGENCE:
+			case CODIVERGENCE:
 				noOfSpecs++;
 				break;
 			case LEAF:
