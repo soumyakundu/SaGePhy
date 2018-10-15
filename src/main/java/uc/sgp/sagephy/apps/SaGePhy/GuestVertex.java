@@ -384,16 +384,16 @@ public class GuestVertex extends NewickVertex {
 				sb.append(" VERTEXTYPE=Speciation"+ " "+ disctpt);
 				break;
             case CODIVERGENCE:
-                double [] disctTimes= v.epoch.getTimes();
-                int k=0;
-                while (true && k < disctTimes.length){
-                    if (disctTimes[k] >= v.abstime){
+                double [] disctTimes9= v.epoch.getTimes();
+                int l=0;
+                while (true && l < disctTimes9.length){
+                    if (disctTimes9[l] >= v.abstime){
                         break;
                     }
-                    ++k;
+                    ++l;
                 }
-                String disctpt= "DISCPT=(" + v.epoch.getNo() + "," + k +")";
-                sb.append(" VERTEXTYPE=Co-divergence"+ " "+ disctpt);
+                String disctpt9= "DISCPT=(" + v.epoch.getNo() + "," + l +")";
+                sb.append(" VERTEXTYPE=Co-divergence"+ " "+ disctpt9);
                 break;
 			case LEAF:
 				sb.append(" VERTEXTYPE=Leaf");
