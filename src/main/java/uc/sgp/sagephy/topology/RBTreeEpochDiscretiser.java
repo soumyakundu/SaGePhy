@@ -621,10 +621,10 @@ public class RBTreeEpochDiscretiser implements RootedTreeDiscretiser, ProperDepe
 		StringMap metas = new StringMap("Meta", this.S.getNoOfVertices());
 		for (int x = 0; x < this.S.getNoOfVertices(); ++x) {
 			String eps = " EPOCHS=(" + this.getEpochNoAbove(x) + "..." + (this.S.isRoot(x) ? this.getEpochNoAbove(x) : this.getEpochNoBelow(this.S.getParent(x))) + ')';
-			metas.set(x, "[&&PRIME ID=" + x + " NT=" + this.times.getVertexTime(x) + eps + "]");
+			metas.set(x, "[ID=" + x + " NT=" + this.times.getVertexTime(x) + eps + "]");
 		}
 		try {
-			String treeMeta = "[&&PRIME NAME=" + this.S.getName() + " DISCTYPE=" + DISC_TYPE + " NMIN=" + this.nmin + " NMAX=" + this.nmax + " DELTAT=" + this.deltat + " NROOT=" + this.nroot + ']';
+			String treeMeta = "[NAME=" + this.S.getName() + " DISCTYPE=" + DISC_TYPE + " NMIN=" + this.nmin + " NMAX=" + this.nmax + " DELTAT=" + this.deltat + " NROOT=" + this.nroot + ']';
 			return NewickTreeWriter.write(this.S, this.names, this.times.getArcTimesMap(), metas, treeMeta, false);
 		} catch (NewickIOException e) {
 			throw new RuntimeException(e);

@@ -338,10 +338,10 @@ public class RBTreeArcDiscretiser implements RootedTreeDiscretiser, ProperDepend
 		for (int x = 0; x < this.S.getNoOfVertices(); ++x) {
 			String pts = Arrays.toString(this.discTimes[x]);
 			pts = "(" + pts.substring(1, pts.length()-1) + ')';   // [...] => (...)
-			metas.set(x, "[&&PRIME ID=" + x + " NT=" + this.getVertexTime(x) + " DISCTIMES=" + pts + "]");
+			metas.set(x, "[ID=" + x + " NT=" + this.getVertexTime(x) + " DISCTIMES=" + pts + "]");
 		}
 		try {
-			String treeMeta = "[&&PRIME NAME=" + this.S.getName() + " DISCTYPE=" + DISC_TYPE + " NMIN=" + this.nmin + " NMAX=" + this.nmax + " DELTAT=" + this.deltat + " NROOT=" + this.nroot + ']';
+			String treeMeta = "[NAME=" + this.S.getName() + " DISCTYPE=" + DISC_TYPE + " NMIN=" + this.nmin + " NMAX=" + this.nmax + " DELTAT=" + this.deltat + " NROOT=" + this.nroot + ']';
 			return NewickTreeWriter.write(this.S, this.names, this.times.getArcTimesMap(), metas, treeMeta, false);
 		} catch (NewickIOException e) {
 			throw new RuntimeException(e);

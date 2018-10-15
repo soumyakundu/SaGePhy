@@ -188,7 +188,7 @@ public class BranchRelaxer implements SaGePhyApp {
 			int n = names.getSize();
 			StringMap metas = new StringMap("Meta", n);
 			for (int x = 0; x < n; ++x) {
-				metas.set(x, "[&&PRIME ID=" + x + " ORIGBL=" + origLengths.get(x) + " RATE=" + rates.get(x) + "]");
+				metas.set(x, "[ID=" + x + " ORIGBL=" + origLengths.get(x) + " RATE=" + rates.get(x) + "]");
 			}
 			return NewickTreeWriter.write(T, names, lengths, metas, false);
 		} else {
