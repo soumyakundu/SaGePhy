@@ -34,7 +34,7 @@ public class HostTreeGenParameters {
 
 	/** Max leaves. */
 	@Parameter(names = {"-max", "--max-leaves"}, description = "Maximum number of extant leaves allowed.")
-	public Integer max = 64;
+	public Integer max = 1000;
 
 	/** Leaf size samples. */
 	@Parameter(names = {"-sizes", "--leaf-sizes-file"}, description = "Samples the desired number of extant leaves uniformly from a single-column file. This is suitable for mimicking a known leaf size distribution. Default: No sampling.")

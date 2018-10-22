@@ -43,7 +43,7 @@ The time interval, birth rate, and death rate must be positive real numbers. A h
 
 * -min, --min-leaves : Enforce a minimum number of extant leaves on the pruned tree. Default: 2
 
-* -max, --max-leaves : Enforce a maximum number of extant leaves on the pruned tree. Default: 64
+* -max, --max-leaves : Enforce a maximum number of extant leaves on the pruned tree. Default: 1000
 
 * -nox, --no-auxiliary-tags : Exclude auxiliary meta data tags in output trees.
 
@@ -87,7 +87,7 @@ A file with a pruned species tree in Newick format is required to guide the evol
 
 * -min, --min-leaves : Enforce a minimum number of extant leaves on the pruned tree. Default: 2
 
-* -max, --max-leaves : Enforce a maximum number of extant leaves on the pruned tree. Default: 64
+* -max, --max-leaves : Enforce a maximum number of extant leaves on the pruned tree. Default: 1000
 
 * -minper, --min-leaves-per-host-leaf : Enforce a minimum number of extant guest leaves per host leaf. Default: 0
 
@@ -153,7 +153,7 @@ A file with a pruned species tree in Newick format and a directory containing on
 
 * -min, --min-leaves : Enforce a minimum number of extant leaves on the pruned tree. Default: 2
 
-* -max, --max-leaves : Enforce a maximum number of extant leaves on the pruned tree. Default: 64
+* -max, --max-leaves : Enforce a maximum number of extant leaves on the pruned tree. Default: 1000
 
 * -minper, --min-leaves-per-host-leaf : Enforce a minimum number of extant domain leaves per host leaf. Default: 0
 

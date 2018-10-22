@@ -44,7 +44,7 @@ public class DomainTreeGenParameters {
 
 	/** Max leaves. */
 	@Parameter(names = {"-max", "--max-leaves"}, description = "Maximum number of extant guest leaves allowed.")
-	public Integer max = 64;
+	public Integer max = 1000;
 
 	/** Min leaves per host tree leaf. */
 	@Parameter(names = {"-minper", "--min-leaves-per-host-leaf"}, description = "Minimum number of extant guest leaves per host leaf required.")
