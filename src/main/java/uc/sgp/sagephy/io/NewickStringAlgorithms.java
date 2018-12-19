@@ -26,7 +26,7 @@ public class NewickStringAlgorithms {
 	 */
 	public static CharQueue strip(String str, int maxSemiColons) {
 		// Strip non-meta comments.
-		str = str.replaceAll("\\[[^\\&][^\\&][^\\]]*\\]", "");
+		//str = str.replaceAll("\\[[^\\&][^\\&][^\\]]*\\]", "");
 		
 		// Strip away all blanks unless in meta tags.
 		CharQueue q = new CharQueue();
