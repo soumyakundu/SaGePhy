@@ -982,7 +982,7 @@ public class DomainTreeInHostTreeCreator implements UnprunedGuestTreeCreator {
 
 	//Replaces parent vertex with child vertex.
 	public Pair<GuestVertex, GuestVertex> swap(GuestVertex lin, GuestVertex child, PRNG prng) {
-		child = this.createGuestVertex(lin.sigma, lin.abstime + lin.branchtime, prng, lin.guestTree);
+		child = this.createGuestVertex(lin.sigma, lin.abstime, prng, lin.guestTree);
 		if (lin != this.root) {
 			if (lin.getParent().getChildren().get(0) == lin) {
 				lin.getParent().getChildren().set(0, child);
